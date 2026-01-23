@@ -1,0 +1,17 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# LLMs and Providers
+.claude/
+CLAUDE.md
+
+# User configuration files (keep template in repo)
+config.toml
