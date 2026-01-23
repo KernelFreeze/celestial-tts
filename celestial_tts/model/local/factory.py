@@ -9,8 +9,15 @@ from celestial_tts.model.local.qwen.preset import QwenTTSPreset
 
 
 class LocalTTSType(Enum):
-    QWEN_PRESET = "preset"
-    QWEN_CUSTOM = "custom"
+    QWEN_PRESET = "qwen3-tts-preset"
+    QWEN_CUSTOM = "qwen3-tts-custom"
+
+    @classmethod
+    def from_str(cls, value: str) -> "LocalTTSType":
+        for member in cls:
+            if member.value == value:
+                return member
+        raise ValueError(f"Unknown local TTS type: {value}")
 
 
 class LocalTTSFactory:

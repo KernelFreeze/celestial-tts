@@ -1,20 +1,49 @@
-from typing import Annotated, Generic, List, Optional, Tuple, TypeVar, Union
+from typing import Generic, List, Optional, Set, Tuple, TypeVar, Union
 
 import numpy as np
-from pydantic import BaseModel, StringConstraints
+from pydantic import BaseModel
+
+from celestial_tts.database import Database
+from celestial_tts.model.types import NonEmptyStr
 
 LanguageT = TypeVar("LanguageT")
 SpeakerT = TypeVar("SpeakerT")
-
-NonEmptyStr = Annotated[str, StringConstraints(min_length=1)]
 
 
 class LocalTTSModel(BaseModel, Generic[LanguageT, SpeakerT]):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def generate_voice(
+    async def str_to_language(
+        self, database: Database, language_str: str
+    ) -> Optional[LanguageT]:
+        """Convert a string into a LanguageT. This function might error if conversion is not supported, or None if not found."""
+        raise NotImplementedError()
+
+    async def str_to_speaker(
+        self, database: Database, speaker_str: str
+    ) -> Optional[SpeakerT]:
+        """Convert a string into a SpeakerT. This function might error if conversion is not supported, or None if not found."""
+        raise NotImplementedError()
+
+    async def get_supported_languages(self, database: Database) -> Set[LanguageT]:
+        """Return the set of supported language codes."""
+        raise NotImplementedError()
+
+    async def get_supported_speakers(
+        self, database: Database
+    ) -> Optional[Set[SpeakerT]]:
+        """
+        Return the set of supported speaker names.
+
+        For models with dynamic/custom speakers, return an empty set
+        and override validate_speaker() instead.
+        """
+        raise NotImplementedError()
+
+    async def generate_voice(
         self,
+        database: Database,
         text: Union[NonEmptyStr, List[NonEmptyStr]],
         language: LanguageT,
         speaker: SpeakerT,

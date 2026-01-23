@@ -7,7 +7,7 @@ from celestial_tts.model.local import LocalTTSModel
 from celestial_tts.model.local.factory import LocalTTSType
 
 
-class ModelCache(BaseModel):
+class LocalModelCache(BaseModel):
     max_loaded_models: int
     _cache: OrderedDict[LocalTTSType, LocalTTSModel]
 

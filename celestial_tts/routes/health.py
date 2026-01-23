@@ -1,14 +1,11 @@
-from fastapi import APIRouter, Depends
-
-from celestial_tts.config import Config
-from celestial_tts.injectors import get_config
+from fastapi import APIRouter
 
 router = APIRouter()
 
 
 @router.get("/health")
-async def health_check(config: Config = Depends(get_config)):
-    """Health check endpoint that shows current configuration."""
+async def health_check():
+    """Health check endpoint."""
     return {
         "status": "ok",
     }
