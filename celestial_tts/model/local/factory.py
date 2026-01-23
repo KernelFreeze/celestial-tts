@@ -46,12 +46,18 @@ class LocalTTSFactory:
             )
             return QwenTTSPreset(model=model)
         elif model_type == LocalTTSType.QWEN_CUSTOM:
-            model = Qwen3TTSModel.from_pretrained(
+            clone_model = Qwen3TTSModel.from_pretrained(
                 "Qwen/Qwen3-TTS-12Hz-1.7B-Base",
                 device_map=device_map,
                 dtype=torch.bfloat16,
                 attn_implementation="flash_attention_2",
             )
-            return QwenTTSCustom(model=model)
+            design_model = Qwen3TTSModel.from_pretrained(
+                "Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign",
+                device_map=device_map,
+                dtype=torch.bfloat16,
+                attn_implementation="flash_attention_2",
+            )
+            return QwenTTSCustom(clone_model=clone_model, design_model=design_model)
         else:
             raise ValueError(f"Unknown Qwen TTS model type: {model_type}")

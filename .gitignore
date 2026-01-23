@@ -15,3 +15,6 @@ CLAUDE.md
 
 # User configuration files (keep template in repo)
 config.toml
+
+# Database
+*.db

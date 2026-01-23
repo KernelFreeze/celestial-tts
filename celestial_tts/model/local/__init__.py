@@ -14,6 +14,20 @@ class LocalTTSModel(BaseModel, Generic[LanguageT, SpeakerT]):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+    def supports_custom_speakers(self) -> bool:
+        """Return whether this model supports creating custom speakers."""
+        return False
+
+    async def create_speaker(
+        self,
+        name: str,
+        text: Union[NonEmptyStr, List[NonEmptyStr]],
+        language: LanguageT,
+        instruct: Union[NonEmptyStr, List[NonEmptyStr]],
+    ) -> SpeakerT:
+        """Create a new speaker for this model"""
+        raise NotImplementedError()
+
     async def str_to_language(
         self, database: Database, language_str: str
     ) -> Optional[LanguageT]:

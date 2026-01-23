@@ -1,5 +1,5 @@
 import asyncio
-from typing import List, Literal, Optional, Set, Tuple, Union, get_args
+from typing import ClassVar, List, Literal, Optional, Set, Tuple, Union, get_args
 
 import numpy as np
 from qwen_tts import Qwen3TTSModel
@@ -31,7 +31,7 @@ class QwenTTSPreset(LocalTTSModel[Language, Speaker]):
     model_config = {"arbitrary_types_allowed": True}
     model: Qwen3TTSModel
     loaded: bool = True
-    lock = asyncio.Lock()
+    lock: ClassVar[asyncio.Lock] = asyncio.Lock()
 
     def __init__(
         self,

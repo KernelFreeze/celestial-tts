@@ -11,6 +11,17 @@ from pydantic_settings import (
 )
 
 
+class DatabaseConfig(BaseSettings):
+    """Configuration for database."""
+
+    model_config = SettingsConfigDict(env_prefix="CELESTIAL_DATABASE_")
+
+    url: str = Field(
+        default="sqlite+aiosqlite:///database.db",
+        description="Database URL. Supports sqlite and postgres (e.g., postgresql+asyncpg://user:pass@localhost/db)",
+    )
+
+
 class IntegratedModelsConfig(BaseSettings):
     """Configuration for integrated models."""
 
@@ -43,6 +54,11 @@ class Config(BaseSettings):
             "config.toml",
             Path.home() / ".config" / "celestial-tts" / "config.toml",
         ],
+    )
+
+    database: DatabaseConfig = Field(
+        default_factory=DatabaseConfig,
+        description="Configuration for database",
     )
 
     integrated_models: IntegratedModelsConfig = Field(
@@ -94,7 +110,8 @@ def create_default_config(path: Path | None = None) -> Path:
 
     path.parent.mkdir(parents=True, exist_ok=True)
     default_config = Config.model_construct(
-        integrated_models=IntegratedModelsConfig.model_construct()
+        database=DatabaseConfig.model_construct(),
+        integrated_models=IntegratedModelsConfig.model_construct(),
     )
     path.write_text(tomli_w.dumps(default_config.model_dump()), encoding="utf-8")
     return path
