@@ -70,7 +70,7 @@ class LocalModelCache(BaseModel):
             if len(self._cache) >= self.max_loaded_models:
                 # Remove least recently used (first item)
                 lru_model_type, lru_model = self._cache.popitem(last=False)
-                # Optionally: add cleanup logic here if models need explicit unloading
+                lru_model.unload()
 
             # Add new model
             self._cache[model_type] = model
