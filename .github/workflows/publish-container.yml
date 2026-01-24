@@ -3,8 +3,14 @@ name: Publish Container
 on:
     push:
         branches: [main]
+        paths:
+            - "**.py"
+            - "pyproject.toml"
+            - "uv.lock"
+            - "Containerfile"
+            - "config.toml"
         tags:
-            - 'v*'
+            - "v*"
     workflow_dispatch:
 
 env:

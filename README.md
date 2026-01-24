@@ -46,7 +46,55 @@ A multi-lingual, multi-provider Text-to-Speech (TTS) REST API microservice built
 - CUDA-capable GPU (recommended) or CPU
 - ~3.5GB RAM/VRAM per loaded model
 
-## Installation
+## Quick Start
+
+### Using Pre-built Container (Recommended)
+
+The easiest way to run Celestial TTS is using the pre-built container image:
+
+```bash
+# Pull the latest image
+podman pull ghcr.io/kernelfreeze/celestial-tts:latest
+
+# Run with GPU support (requires NVIDIA Container Toolkit)
+podman run --gpus all -p 8080:8080 \
+  -v ~/.cache/huggingface:/root/.cache/huggingface \
+  ghcr.io/kernelfreeze/celestial-tts:latest
+
+# Run on CPU only
+podman run -p 8080:8080 \
+  -e CELESTIAL_INTEGRATED_MODELS_DEVICE_MAP=cpu \
+  -v ~/.cache/huggingface:/root/.cache/huggingface \
+  ghcr.io/kernelfreeze/celestial-tts:latest
+
+# With Docker
+docker run --gpus all -p 8080:8080 \
+  -v ~/.cache/huggingface:/root/.cache/huggingface \
+  ghcr.io/kernelfreeze/celestial-tts:latest
+```
+
+**Persistent Configuration:**
+
+To persist database and configuration:
+
+```bash
+podman run --gpus all -p 8080:8080 \
+  -v ~/.cache/huggingface:/root/.cache/huggingface \
+  -v ./data:/app/data \
+  -e CELESTIAL_DATABASE_URL="sqlite+aiosqlite:///data/database.db" \
+  ghcr.io/kernelfreeze/celestial-tts:latest
+  
+# With Docker
+docker run --gpus all -p 8080:8080 \
+  -v ~/.cache/huggingface:/root/.cache/huggingface \
+  -v ./data:/app/data \
+  -e CELESTIAL_DATABASE_URL="sqlite+aiosqlite:///data/database.db" \
+  ghcr.io/kernelfreeze/celestial-tts:latest
+```
+
+### Building from Source
+
+#### Installation
 
 ```bash
 # Clone the repository
@@ -60,23 +108,35 @@ uv sync
 pip install -e .
 ```
 
-## Quick Start
+#### Running Locally
 
-### Using uv
 ```bash
+# Using uv
 uv run celestial-tts
 
 # Run with custom host/port
 uv run celestial-tts --host 0.0.0.0 --port 8000
-```
 
-### Or using pip
-```bash
-# Run with defaults (localhost:8080)
+# Or using pip
 python main.py
 
 # Run with custom host/port
 python main.py --host 0.0.0.0 --port 8000
+```
+
+#### Building Container from Source
+
+```bash
+# Build the container image
+podman build -t celestial-tts .
+
+# Or with Docker
+docker build -t celestial-tts .
+
+# Run your built image
+podman run --gpus all -p 8080:8080 \
+  -v ~/.cache/huggingface:/root/.cache/huggingface \
+  celestial-tts
 ```
 
 ## Authentication
@@ -125,20 +185,6 @@ curl -X POST http://localhost:8080/generate \
 ```
 
 ### Public vs Protected Routes
-
-| Route | Authentication |
-|-------|----------------|
-| `GET /health` | Public |
-| `POST /generate` | Required |
-| `POST /audio/speech` | Required |
-| `GET /speakers` | Required |
-| `POST /speakers` | Required |
-| `DELETE /speakers/{id}` | Required |
-| `GET /auth/tokens` | Required |
-| `POST /auth/tokens` | Required |
-| `POST /auth/tokens/verify` | Required |
-| `POST /auth/tokens/{id}/revoke` | Required |
-| `DELETE /auth/tokens/{id}` | Required |
 
 The API documentation is available at:
 - Swagger UI: http://localhost:8080/docs
