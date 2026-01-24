@@ -10,7 +10,8 @@ from celestial_tts.database.model.custom_speaker import QwenCustomSpeaker
 
 def serialize_tensor(tensor: torch.Tensor, key: str = "data") -> bytes:
     """Serialize a PyTorch tensor to bytes using safetensors."""
-    return safetensors_save({key: tensor})
+    # Ensure tensor is contiguous before saving (required by safetensors)
+    return safetensors_save({key: tensor.contiguous()})
 
 
 def deserialize_tensor(data: bytes, key: str = "data") -> torch.Tensor:

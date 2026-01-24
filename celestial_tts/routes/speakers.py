@@ -1,7 +1,7 @@
 import base64
 import io
 import urllib.request
-from typing import List, Literal, Optional, Tuple
+from typing import List, Literal, Optional, Tuple, Union
 from urllib.parse import urlparse
 from uuid import UUID
 
@@ -14,7 +14,6 @@ from pydantic import BaseModel, Field
 from celestial_tts.config import Config
 from celestial_tts.database import Database
 from celestial_tts.database.controller.custom_speaker import (
-    create_qwen_custom_speaker,
     delete_qwen_custom_speaker,
 )
 from celestial_tts.injectors import get_config, get_database, get_models
@@ -41,9 +40,17 @@ def _is_probably_base64(s: str) -> bool:
     """Check if a string is likely base64 encoded audio data."""
     if s.startswith("data:audio"):
         return True
-    # Base64 strings are typically long and don't contain path separators
-    if ("/" not in s and "\\" not in s) and len(s) > 256:
-        return True
+    # Base64 strings are typically long; try to validate by decoding a small sample
+    if len(s) > 256:
+        try:
+            # Try decoding the first 100 chars (padded to valid length) to check validity
+            sample = s[:100]
+            # Pad to make it a valid base64 length (multiple of 4)
+            padding = (4 - len(sample) % 4) % 4
+            base64.b64decode(sample + "=" * padding, validate=True)
+            return True
+        except Exception:
+            return False
     return False
 
 
@@ -138,11 +145,8 @@ class DeleteSpeakerRequest(BaseModel):
 
 
 class SpeakerInfo(BaseModel):
-    id: UUID = Field(description="The unique identifier of the speaker")
+    id: Union[UUID, str] = Field(description="The unique identifier of the speaker")
     name: str = Field(description="The display name of the speaker")
-    created_at: Optional[str] = Field(
-        default=None, description="ISO 8601 timestamp of when the speaker was created"
-    )
 
 
 class GetSpeakersResponse(BaseModel):
@@ -192,23 +196,14 @@ async def get_speakers(
         if speakers is None:
             return GetSpeakersResponse(status="ok", speakers=[])
 
-        # Check if speakers are strings or SpeakerInfo objects
-        speaker = next(iter(speakers), None)
-        if speaker is None:
-            return GetSpeakersResponse(status="ok", speakers=[])
-
-        if isinstance(speaker, str):
-            return GetSpeakersResponse(status="ok", speakers=list(speakers))
-
         return GetSpeakersResponse(
             status="ok",
             speakers=[
                 SpeakerInfo(
-                    id=s.id,
-                    name=s.name,
-                    created_at=s.created_at.isoformat(),
+                    id=speaker_id,
+                    name=speaker_name,
                 )
-                for s in speakers
+                for speaker_id, speaker_name in speakers
             ],
         )
     else:
@@ -255,21 +250,18 @@ async def create_speaker(
             raise HTTPException(status_code=400, detail=str(e))
 
         # Create the speaker
-        speaker = await model.create_speaker(
+        speaker_id, speaker_name = await model.create_speaker(
+            database,
             request.name,
             audio_data,
             request.text,
         )
 
-        # Save to database
-        speaker = await create_qwen_custom_speaker(database, speaker)
-
         return SpeakerResponse(
             status="ok",
             speaker=SpeakerInfo(
-                id=speaker.id,
-                name=speaker.name,
-                created_at=speaker.created_at.isoformat(),
+                id=speaker_id,
+                name=speaker_name,
             ),
         )
     else:
@@ -278,7 +270,7 @@ async def create_speaker(
         )
 
 
-@router.delete("/speakers/{speaker_id}", response_model=DeleteSpeakerResponse)
+@router.delete("/speakers", response_model=DeleteSpeakerResponse)
 async def delete_speaker(
     request: DeleteSpeakerRequest,
     config: Config = Depends(get_config),

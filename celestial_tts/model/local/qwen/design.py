@@ -62,8 +62,8 @@ class QwenTTSDesign(LocalTTSModel[Language, Speaker]):
 
     async def get_supported_speakers(
         self, database: Database
-    ) -> Optional[Set[Speaker]]:
-        return SUPPORTED_SPEAKERS
+    ) -> Optional[Set[Tuple[Speaker, str]]]:
+        return {(speaker, speaker) for speaker in SUPPORTED_SPEAKERS}
 
     async def generate_voice(
         self,

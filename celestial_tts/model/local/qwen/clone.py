@@ -9,6 +9,7 @@ from qwen_tts.inference.qwen3_tts_model import AudioLike
 
 from celestial_tts.database import Database
 from celestial_tts.database.controller.custom_speaker import (
+    create_qwen_custom_speaker,
     select_qwen_custom_speaker_by_id,
     select_qwen_custom_speakers,
 )
@@ -33,7 +34,7 @@ Language = Literal[
 SUPPORTED_LANGUAGES: Set[Language] = set(get_args(Language))
 
 
-class QwenTTSClone(LocalTTSModel[Language, QwenCustomSpeaker]):
+class QwenTTSClone(LocalTTSModel[Language, UUID]):
     """Qwen3 TTS using voice cloning"""
 
     model_config = {"arbitrary_types_allowed": True}
@@ -46,16 +47,22 @@ class QwenTTSClone(LocalTTSModel[Language, QwenCustomSpeaker]):
 
     async def create_speaker(
         self,
+        database: Database,
         name: str,
         ref_audio: AudioLike,
         ref_text: str,
-    ) -> QwenCustomSpeaker:
+    ) -> Tuple[UUID, str]:
         voice_clone_prompt = self.model.create_voice_clone_prompt(
             ref_audio=ref_audio,
             ref_text=ref_text,
         )[0]
 
-        return qwen_speaker_from_prompt(name, voice_clone_prompt)
+        speaker = qwen_speaker_from_prompt(name, voice_clone_prompt)
+
+        # Save to database
+        speaker = await create_qwen_custom_speaker(database, speaker)
+
+        return speaker.id, speaker.name
 
     def __init__(
         self,
@@ -72,28 +79,29 @@ class QwenTTSClone(LocalTTSModel[Language, QwenCustomSpeaker]):
 
     async def str_to_speaker(
         self, database: Database, speaker_str: str
-    ) -> Optional[QwenCustomSpeaker]:
-        # Try to parse the speaker_str into an UUID
+    ) -> Optional[UUID]:
         try:
-            uuid = UUID(speaker_str)
+            return UUID(speaker_str)
         except ValueError:
             raise HTTPException(400, f"Invalid speaker UUID: {speaker_str}")
-        return await select_qwen_custom_speaker_by_id(database, uuid)
 
     async def get_supported_languages(self, database: Database) -> Set[Language]:
         return SUPPORTED_LANGUAGES
 
     async def get_supported_speakers(
         self, database: Database
-    ) -> Optional[Set[QwenCustomSpeaker]]:
-        return set(await select_qwen_custom_speakers(database))
+    ) -> Optional[Set[Tuple[UUID, str]]]:
+        return set(
+            (speaker.id, speaker.name)
+            for speaker in await select_qwen_custom_speakers(database)
+        )
 
     async def generate_voice(
         self,
         database: Database,
         text: Union[NonEmptyStr, List[NonEmptyStr]],
         language: Language,
-        speaker: QwenCustomSpeaker,
+        speaker: UUID,
         instruct: Optional[NonEmptyStr] = None,
         top_k: Optional[int] = None,
         top_p: Optional[float] = None,
@@ -105,9 +113,15 @@ class QwenTTSClone(LocalTTSModel[Language, QwenCustomSpeaker]):
         if not self.loaded:
             raise ValueError("Model is not loaded")
 
+        db_speaker = await select_qwen_custom_speaker_by_id(database, speaker)
+        if not db_speaker:
+            raise HTTPException(status_code=404, detail=f"Speaker {speaker} not found")
+
+        voice_clone_prompt = db_speaker.to_voice_clone_prompt(self.model.device)
+
         def run():
             return self.model.generate_voice_clone(
-                voice_clone_prompt=[speaker.to_voice_clone_prompt(self.model.device)],
+                voice_clone_prompt=[voice_clone_prompt],
                 text=text,
                 language=language,
                 speaker=speaker,

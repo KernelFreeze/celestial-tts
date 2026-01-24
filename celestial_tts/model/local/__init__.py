@@ -22,13 +22,17 @@ class LocalTTSModel(BaseModel, Generic[LanguageT, SpeakerT]):
 
     async def create_speaker(
         self,
+        database: Database,
         name: str,
         ref_audio: AudioLike,
         ref_text: str,
-    ) -> SpeakerT:
+    ) -> Tuple[SpeakerT, str]:
         """
         Create a new speaker for this model by using the reference audio and text.
         Most models that support custom speakers will use the reference audio and text to clone the speaker's voice.
+
+        Returns:
+            SpeakerData: The newly created speaker (Usually the speaker id) and the speaker name.
         """
         raise NotImplementedError()
 
@@ -50,12 +54,15 @@ class LocalTTSModel(BaseModel, Generic[LanguageT, SpeakerT]):
 
     async def get_supported_speakers(
         self, database: Database
-    ) -> Optional[Set[SpeakerT]]:
+    ) -> Optional[Set[Tuple[SpeakerT, str]]]:
         """
         Return the set of supported speaker names.
 
         For models with dynamic/custom speakers, return an empty set
         and override validate_speaker() instead.
+
+        Returns:
+            Optional[Set[SpeakerData]]: The set of supported speaker names and their corresponding names.
         """
         raise NotImplementedError()
 

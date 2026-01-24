@@ -69,8 +69,10 @@ class QwenTTSPreset(LocalTTSModel[Language, Speaker]):
     async def get_supported_languages(self, database: Database) -> Set[Language]:
         return SUPPORTED_LANGUAGES
 
-    async def get_supported_speakers(self, database: Database) -> Set[Speaker]:
-        return SUPPORTED_SPEAKERS
+    async def get_supported_speakers(
+        self, database: Database
+    ) -> Set[Tuple[Speaker, str]]:
+        return {(speaker, speaker.replace("_", " ")) for speaker in SUPPORTED_SPEAKERS}
 
     async def generate_voice(
         self,
