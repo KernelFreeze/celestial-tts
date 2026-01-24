@@ -1,11 +1,22 @@
+from typing import Literal
+
 from fastapi import APIRouter
+from pydantic import BaseModel
 
 router = APIRouter()
 
 
+Status = Literal["ok", "error"]
+
+
+class HealthResponse(BaseModel):
+    status: Status
+    """The status of the request"""
+    message: str
+    """The message of the request"""
+
+
 @router.get("/health")
-async def health_check():
+async def health_check() -> HealthResponse:
     """Health check endpoint."""
-    return {
-        "status": "ok",
-    }
+    return HealthResponse(status="ok", message="All systems are operational")

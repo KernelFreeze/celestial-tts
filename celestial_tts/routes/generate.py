@@ -1,5 +1,5 @@
 import base64
-from typing import List, Optional, Union
+from typing import List, Literal, Optional, Union
 
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
@@ -11,6 +11,8 @@ from celestial_tts.injectors import get_config, get_database, get_models
 from celestial_tts.model import ModelState
 from celestial_tts.model.local.factory import LocalTTSFactory, LocalTTSType
 from celestial_tts.model.types import NonEmptyStr
+
+Status = Literal["ok", "error"]
 
 
 class GenerateRequest(BaseModel):
@@ -27,16 +29,29 @@ class GenerateRequest(BaseModel):
     provider: str = "local"
 
 
+class GenerateResponse(BaseModel):
+    status: Status
+    """The status of the request"""
+    wavs: List[str]
+    """
+    The base64-encoded audio data.
+    Every entry in the list is a base64-encoded audio
+    file for every matching input text.
+    """
+    sampling_rate: int
+    """The sampling rate of the audio"""
+
+
 router = APIRouter()
 
 
-@router.post("/generate")
+@router.post("/generate", response_model=GenerateResponse)
 async def generate(
     request: GenerateRequest,
     config: Config = Depends(get_config),
     models: ModelState = Depends(get_models),
     database: Database = Depends(get_database),
-):
+) -> GenerateResponse:
     """Generate a text-to-speech audio."""
     if request.provider == "local":
         if models.local_state is None:
@@ -91,11 +106,11 @@ async def generate(
 
         # Serialize wavs to base64
         base64_wavs = [base64.b64encode(wav).decode("utf-8") for wav in wavs]
-        return {
-            "status": "ok",
-            "wavs": base64_wavs,
-            "sampling_rate": sr,
-        }
+        return GenerateResponse(
+            status="ok",
+            wavs=base64_wavs,
+            sampling_rate=sr,
+        )
     else:
         raise HTTPException(
             status_code=400, detail="Remote models not implemented yet."
