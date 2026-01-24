@@ -69,6 +69,66 @@ python main.py
 python main.py --host 0.0.0.0 --port 8000
 ```
 
+## Authentication
+
+Most API routes require a valid auth token. Tokens use the format `sk-ct-v1-<base64>` and are passed via the `Authorization` header as a Bearer token.
+
+### Creating Your First Token
+
+Before using protected endpoints, create a bootstrap token using the CLI:
+
+```bash
+# Create a token that never expires
+celestial-tts-create-token --name "My API Token"
+
+# Create a token that expires in 30 days
+celestial-tts-create-token --name "Temporary Token" --expires-in 30
+
+# Short flags
+celestial-tts-create-token -n "Dev Token" -e 7
+```
+
+The command outputs the token details:
+
+```
+Token created successfully!
+
+  ID:         01234567-89ab-cdef-0123-456789abcdef
+  Name:       My API Token
+  Created:    2026-01-23T12:00:00
+  Expires:    Never
+
+  Token:      sk-ct-v1-MDEyMzQ1NjctODlhYi...
+
+Store this token securely - it cannot be retrieved later.
+```
+
+### Using Tokens
+
+Include the token in your requests:
+
+```bash
+curl -X POST http://localhost:8080/generate \
+  -H "Authorization: Bearer sk-ct-v1-..." \
+  -H "Content-Type: application/json" \
+  -d '{"model_id": "qwen3-tts-preset", "text": "Hello!", "language": "english", "speaker": "Vivian"}'
+```
+
+### Public vs Protected Routes
+
+| Route | Authentication |
+|-------|----------------|
+| `GET /health` | Public |
+| `POST /generate` | Required |
+| `GET /speakers` | Required |
+| `POST /speakers` | Required |
+| `DELETE /speakers/{id}` | Required |
+| `GET /auth/tokens` | Required |
+| `POST /auth/tokens` | Required |
+| `POST /auth/tokens/verify` | Required |
+| `POST /auth/tokens/{id}/revoke` | Required |
+| `DELETE /auth/tokens/{id}` | Required |
+
 The API documentation is available at:
 - Swagger UI: http://localhost:8080/docs
 - ReDoc: http://localhost:8080/redoc
@@ -232,12 +292,18 @@ Supports custom voice cloning and voice design. Create unique voices by providin
 import requests
 import base64
 
-response = requests.post("http://localhost:8080/generate", json={
-    "model_id": "qwen3-tts-preset",
-    "text": "Welcome to Celestial TTS!",
-    "language": "english",
-    "speaker": "Vivian"
-})
+TOKEN = "sk-ct-v1-..."  # Your auth token
+
+response = requests.post(
+    "http://localhost:8080/generate",
+    headers={"Authorization": f"Bearer {TOKEN}"},
+    json={
+        "model_id": "qwen3-tts-preset",
+        "text": "Welcome to Celestial TTS!",
+        "language": "english",
+        "speaker": "Vivian"
+    }
+)
 
 data = response.json()
 audio_bytes = base64.b64decode(data["wavs"][0])
@@ -250,6 +316,7 @@ with open("output.wav", "wb") as f:
 
 ```bash
 curl -X POST http://localhost:8080/generate \
+  -H "Authorization: Bearer sk-ct-v1-..." \
   -H "Content-Type: application/json" \
   -d '{
     "model_id": "qwen3-tts-preset",
