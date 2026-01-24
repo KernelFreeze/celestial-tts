@@ -7,6 +7,7 @@ A multi-lingual, multi-provider Text-to-Speech (TTS) REST API microservice built
 - **Multi-lingual support** - 11 languages including auto-detection
 - **Multiple voice presets** - 9 built-in voices with distinct characteristics
 - **Custom voice cloning** - Clone voices from audio samples
+- **OpenAI-compatible API** - Drop-in replacement for OpenAI's TTS API
 - **Async-first architecture** - Built on FastAPI with full async support
 - **LRU model caching** - Efficient memory management for multiple models
 - **Flexible configuration** - Environment variables, TOML files, or code
@@ -129,6 +130,7 @@ curl -X POST http://localhost:8080/generate \
 |-------|----------------|
 | `GET /health` | Public |
 | `POST /generate` | Required |
+| `POST /audio/speech` | Required |
 | `GET /speakers` | Required |
 | `POST /speakers` | Required |
 | `DELETE /speakers/{id}` | Required |
@@ -173,15 +175,109 @@ device_map = "cuda:0"
 
 ## API Reference
 
+Celestial TTS provides two API styles:
+
+1. **OpenAI-compatible API** (`/v1/audio/speech`) - Drop-in replacement for OpenAI's TTS API
+2. **Native API** (`/v1/generate`) - Full access to all features and customization
+
 ### Health Check
 
 ```http
-GET /health
+GET /api/health
 ```
 
 Returns service health status.
 
-### Generate Speech
+### OpenAI-Compatible Speech Synthesis
+
+```http
+POST /api/v1/audio/speech
+Content-Type: application/json
+Authorization: Bearer sk-ct-v1-...
+
+{
+  "model": "tts-1",
+  "voice": "alloy",
+  "input": "Hello, world!",
+  "response_format": "mp3",
+  "speed": 1.0
+}
+```
+
+This endpoint is fully compatible with OpenAI's `/v1/audio/speech` API, allowing you to use existing OpenAI client libraries with Celestial TTS.
+
+**Parameters:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `model` | string | Yes | Model identifier: `tts-1`, `tts-1-hd`, or native model IDs |
+| `input` | string | Yes | Text to synthesize (max 4096 characters) |
+| `voice` | string | Yes | Voice name (OpenAI or native speaker names) |
+| `response_format` | string | No | Audio format: `mp3` (default), `opus`, `aac`, `flac`, `wav`, `pcm` |
+| `speed` | float | No | Playback speed (0.25 to 4.0, default: 1.0) |
+| `instructions` | string | No | Voice control instructions (voice-design model only) |
+
+**Voice Mapping:**
+
+OpenAI voice names are automatically mapped to native speakers:
+
+| OpenAI Voice | Native Speaker |
+|--------------|----------------|
+| `alloy` | Vivian |
+| `echo` | Dylan |
+| `fable` | Serena |
+| `onyx` | Eric |
+| `nova` | Aiden |
+| `shimmer` | Sohee |
+
+You can also use native speaker names directly (`Vivian`, `Ryan`, etc.) or custom speaker UUIDs.
+
+**Model Mapping:**
+
+| OpenAI Model | Native Model |
+|--------------|--------------|
+| `tts-1` | qwen3-tts-preset |
+| `tts-1-hd` | qwen3-tts-preset |
+
+**Response:**
+
+Returns raw audio bytes with appropriate `Content-Type` header (`audio/mpeg`, `audio/wav`, etc.).
+
+**Usage with OpenAI Python Client:**
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="http://localhost:8080/api/v1",
+    api_key="sk-ct-v1-..."  # Your Celestial TTS token
+)
+
+response = client.audio.speech.create(
+    model="tts-1",
+    voice="nova",
+    input="Hello from Celestial TTS!"
+)
+
+response.stream_to_file("output.mp3")
+```
+
+**Usage with cURL:**
+
+```bash
+curl -X POST http://localhost:8080/api/v1/audio/speech \
+  -H "Authorization: Bearer sk-ct-v1-..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "tts-1",
+    "voice": "alloy",
+    "input": "Hello, world!",
+    "response_format": "mp3"
+  }' \
+  --output speech.mp3
+```
+
+### Generate Speech (Native API)
 
 ```http
 POST /generate
@@ -344,7 +440,47 @@ Supports custom voice design. Create unique voices by providing reference text a
 
 ## Usage Examples
 
-### Python
+### OpenAI-Compatible API
+
+#### Python with OpenAI Client
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="http://localhost:8080/api/v1",
+    api_key="sk-ct-v1-..."  # Your Celestial TTS token
+)
+
+# Generate speech
+response = client.audio.speech.create(
+    model="tts-1",
+    voice="nova",
+    input="Welcome to Celestial TTS!",
+    response_format="mp3"
+)
+
+# Save to file
+response.stream_to_file("output.mp3")
+```
+
+#### cURL
+
+```bash
+curl -X POST http://localhost:8080/api/v1/audio/speech \
+  -H "Authorization: Bearer sk-ct-v1-..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "tts-1",
+    "voice": "alloy",
+    "input": "Hello from the command line!"
+  }' \
+  --output speech.mp3
+```
+
+### Native API
+
+#### Python with requests
 
 ```python
 import requests
@@ -353,7 +489,7 @@ import base64
 TOKEN = "sk-ct-v1-..."  # Your auth token
 
 response = requests.post(
-    "http://localhost:8080/generate",
+    "http://localhost:8080/api/v1/generate",
     headers={"Authorization": f"Bearer {TOKEN}"},
     json={
         "model_id": "qwen3-tts-preset",
@@ -370,10 +506,10 @@ with open("output.wav", "wb") as f:
     f.write(audio_bytes)
 ```
 
-### cURL
+#### cURL
 
 ```bash
-curl -X POST http://localhost:8080/generate \
+curl -X POST http://localhost:8080/api/v1/generate \
   -H "Authorization: Bearer sk-ct-v1-..." \
   -H "Content-Type: application/json" \
   -d '{

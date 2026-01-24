@@ -113,6 +113,11 @@ class QwenTTSClone(LocalTTSModel[Language, UUID]):
         if not self.loaded:
             raise ValueError("Model is not loaded")
 
+        if instruct is not None:
+            raise HTTPException(
+                status_code=400, detail="Instruct is not supported for Qwen Clone"
+            )
+
         db_speaker = await select_qwen_custom_speaker_by_id(database, speaker)
         if not db_speaker:
             raise HTTPException(status_code=404, detail=f"Speaker {speaker} not found")
@@ -125,7 +130,6 @@ class QwenTTSClone(LocalTTSModel[Language, UUID]):
                 text=text,
                 language=language,
                 speaker=speaker,
-                instruct=instruct,
                 top_k=top_k,
                 top_p=top_p,
                 temperature=temperature,

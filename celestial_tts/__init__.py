@@ -8,7 +8,7 @@ from celestial_tts.database import Database
 from celestial_tts.injectors import get_authenticated_token
 from celestial_tts.middleware import RequestLoggingMiddleware
 from celestial_tts.model import ModelState
-from celestial_tts.routes import auth, generate, health, speakers
+from celestial_tts.routes import auth, generate, health, openai_speech, speakers
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +49,7 @@ v1 = APIRouter(
 v1.include_router(generate.router)
 v1.include_router(speakers.router)
 v1.include_router(auth.router)
+v1.include_router(openai_speech.router)
 
 api = APIRouter(prefix="/api")
 api.include_router(health.router)
