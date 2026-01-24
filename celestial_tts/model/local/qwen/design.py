@@ -41,7 +41,7 @@ class QwenTTSDesign(LocalTTSModel[Language, Speaker]):
         self,
         model: Qwen3TTSModel,
     ):
-        super().__init__(design_model=model)
+        super().__init__(model=model)
 
     async def str_to_language(
         self, database: Database, language_str: str

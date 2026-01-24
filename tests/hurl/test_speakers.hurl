@@ -1,8 +1,30 @@
-# Test Custom Speaker Creation and Usage
+# Test Custom Speaker Creation (Voice Cloning) and Usage
 # Run with: hurl --variables-file tests/hurl/vars.env --test tests/hurl/test_speakers.hurl
 # Note: Requires the server to be running on 127.0.0.1:8080
+#
+# This test file uses voice design to generate reference audio, then uses that
+# audio to test the voice cloning endpoint.
 
-# 1. Try to create a speaker with a model that doesn't support custom speakers (should fail)
+# 1. Generate reference audio using voice design (to use for cloning)
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
+Content-Type: application/json
+{
+  "model_id": "qwen3-tts-voice-design",
+  "text": "Hello, this is a test of my custom voice. I sound friendly and warm.",
+  "language": "english",
+  "speaker": "generated",
+  "instruct": "A friendly, warm, and cheerful female voice"
+}
+HTTP 200
+[Captures]
+reference_audio: jsonpath "$.wavs[0]"
+[Asserts]
+jsonpath "$.status" == "ok"
+jsonpath "$.wavs[0]" exists
+
+
+# 2. Try to create a speaker with a model that doesn't support custom speakers (should fail)
 POST {{base_url}}/api/v1/speakers
 Authorization: Bearer {{token}}
 Content-Type: application/json
@@ -10,24 +32,22 @@ Content-Type: application/json
   "model_id": "qwen3-tts-preset",
   "name": "Test Speaker",
   "text": "Hello, this is a test voice.",
-  "language": "en",
-  "instruct": "A friendly, warm voice"
+  "audio": "{{reference_audio}}"
 }
 HTTP 400
 [Asserts]
 jsonpath "$.detail" contains "does not support custom speakers"
 
 
-# 2. Create a custom speaker with qwen3-tts-custom model
+# 3. Create a custom speaker with voice cloning using the generated audio
 POST {{base_url}}/api/v1/speakers
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-custom",
+  "model_id": "qwen3-tts-voice-clone",
   "name": "Friendly Voice",
   "text": "Hello, this is a test of my custom voice. I sound friendly and warm.",
-  "language": "en",
-  "instruct": "A friendly, warm, and cheerful voice"
+  "audio": "{{reference_audio}}"
 }
 HTTP 200
 [Captures]
@@ -39,24 +59,23 @@ jsonpath "$.speaker.id" exists
 jsonpath "$.speaker.created_at" exists
 
 
-# 3. Test with invalid language (should fail)
+# 4. Test with invalid audio data (should fail)
 POST {{base_url}}/api/v1/speakers
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-custom",
-  "name": "Invalid Language Test",
+  "model_id": "qwen3-tts-voice-clone",
+  "name": "Invalid Audio Test",
   "text": "Test text",
-  "language": "invalid_lang",
-  "instruct": "Test voice"
+  "audio": "not-valid-base64-or-url"
 }
 HTTP 400
 [Asserts]
-jsonpath "$.detail" contains "Unsupported language"
+jsonpath "$.detail" contains "Audio input must be"
 
 
-# 4. Get all speakers for qwen3-tts-custom model
-GET {{base_url}}/api/v1/speakers?model_id=qwen3-tts-custom
+# 5. Get all speakers for qwen3-tts-voice-clone model
+GET {{base_url}}/api/v1/speakers?model_id=qwen3-tts-voice-clone
 Authorization: Bearer {{token}}
 HTTP 200
 [Asserts]
@@ -66,7 +85,7 @@ jsonpath "$.speakers[*].id" includes {{speaker_id}}
 jsonpath "$.speakers[?(@.id == '{{speaker_id}}')].name" == "Friendly Voice"
 
 
-# 5. Get speakers for preset model (should return empty list)
+# 6. Get speakers for preset model (should return empty list)
 GET {{base_url}}/api/v1/speakers?model_id=qwen3-tts-preset
 Authorization: Bearer {{token}}
 HTTP 200
@@ -75,16 +94,15 @@ jsonpath "$.status" == "ok"
 jsonpath "$.speakers" isEmpty
 
 
-# 6. Use the created custom speaker to generate audio
+# 7. Use the created custom speaker to generate audio
 POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-custom",
-  "text": "This is a test using my custom voice!",
-  "language": "en",
-  "speaker": "{{speaker_id}}",
-  "instruct": "Speaking with enthusiasm"
+  "model_id": "qwen3-tts-voice-clone",
+  "text": "This is a test using my cloned voice!",
+  "language": "english",
+  "speaker": "{{speaker_id}}"
 }
 HTTP 200
 [Asserts]
@@ -94,32 +112,48 @@ jsonpath "$.wavs[0]" exists
 jsonpath "$.sampling_rate" exists
 
 
-# 7. Try to use invalid speaker UUID in generation (should fail)
+# 8. Try to use invalid speaker UUID in generation (should fail)
 POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-custom",
+  "model_id": "qwen3-tts-voice-clone",
   "text": "This should fail",
-  "language": "en",
-  "speaker": "00000000-0000-0000-0000-000000000000",
-  "instruct": "Test"
+  "language": "english",
+  "speaker": "00000000-0000-0000-0000-000000000000"
 }
 HTTP 400
 [Asserts]
 jsonpath "$.detail" contains "Unsupported speaker"
 
 
-# 8. Create another speaker with multiple text samples
+# 9. Generate another reference audio for a second speaker
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
+Content-Type: application/json
+{
+  "model_id": "qwen3-tts-voice-design",
+  "text": "Welcome to our service. Thank you for choosing us.",
+  "language": "english",
+  "speaker": "generated",
+  "instruct": "A professional, clear, and confident male voice"
+}
+HTTP 200
+[Captures]
+reference_audio_2: jsonpath "$.wavs[0]"
+[Asserts]
+jsonpath "$.status" == "ok"
+
+
+# 10. Create another speaker with the second reference audio
 POST {{base_url}}/api/v1/speakers
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-custom",
+  "model_id": "qwen3-tts-voice-clone",
   "name": "Professional Voice",
-  "text": ["Welcome to our service.", "Thank you for choosing us.", "We appreciate your business."],
-  "language": "en",
-  "instruct": ["Professional", "Clear", "Confident"]
+  "text": "Welcome to our service. Thank you for choosing us.",
+  "audio": "{{reference_audio_2}}"
 }
 HTTP 200
 [Captures]
@@ -129,8 +163,8 @@ jsonpath "$.status" == "ok"
 jsonpath "$.speaker.name" == "Professional Voice"
 
 
-# 9. Verify both speakers are returned in the list
-GET {{base_url}}/api/v1/speakers?model_id=qwen3-tts-custom
+# 11. Verify both speakers are returned in the list
+GET {{base_url}}/api/v1/speakers?model_id=qwen3-tts-voice-clone
 Authorization: Bearer {{token}}
 HTTP 200
 [Asserts]
@@ -140,16 +174,33 @@ jsonpath "$.speakers[*].id" includes {{speaker_id}}
 jsonpath "$.speakers[*].id" includes {{speaker_id_2}}
 
 
-# 10. Test multilingual speaker creation (Japanese)
+# 12. Generate Japanese reference audio for multilingual test
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
+Content-Type: application/json
+{
+  "model_id": "qwen3-tts-voice-design",
+  "text": "こんにちは、これはテストです。",
+  "language": "japanese",
+  "speaker": "generated",
+  "instruct": "優しい女性の声"
+}
+HTTP 200
+[Captures]
+reference_audio_jp: jsonpath "$.wavs[0]"
+[Asserts]
+jsonpath "$.status" == "ok"
+
+
+# 13. Test multilingual speaker creation (Japanese)
 POST {{base_url}}/api/v1/speakers
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-custom",
+  "model_id": "qwen3-tts-voice-clone",
   "name": "Japanese Voice",
   "text": "こんにちは、これはテストです。",
-  "language": "ja",
-  "instruct": "優しい声"
+  "audio": "{{reference_audio_jp}}"
 }
 HTTP 200
 [Captures]
@@ -159,23 +210,23 @@ jsonpath "$.status" == "ok"
 jsonpath "$.speaker.name" == "Japanese Voice"
 
 
-# 11. Try to delete speaker with invalid UUID format (should fail)
-DELETE {{base_url}}/api/v1/speakers/invalid-uuid?model_id=qwen3-tts-custom
+# 14. Try to delete speaker with invalid UUID format (should fail)
+DELETE {{base_url}}/api/v1/speakers/invalid-uuid?model_id=qwen3-tts-voice-clone
 Authorization: Bearer {{token}}
 HTTP 400
 [Asserts]
 jsonpath "$.detail" == "Invalid speaker UUID"
 
 
-# 12. Try to delete non-existent speaker (should fail)
-DELETE {{base_url}}/api/v1/speakers/00000000-0000-0000-0000-000000000000?model_id=qwen3-tts-custom
+# 15. Try to delete non-existent speaker (should fail)
+DELETE {{base_url}}/api/v1/speakers/00000000-0000-0000-0000-000000000000?model_id=qwen3-tts-voice-clone
 Authorization: Bearer {{token}}
 HTTP 404
 [Asserts]
 jsonpath "$.detail" == "Speaker not found"
 
 
-# 13. Try to delete speaker from model that doesn't support custom speakers (should fail)
+# 16. Try to delete speaker from model that doesn't support custom speakers (should fail)
 DELETE {{base_url}}/api/v1/speakers/{{speaker_id}}?model_id=qwen3-tts-preset
 Authorization: Bearer {{token}}
 HTTP 400
@@ -183,8 +234,8 @@ HTTP 400
 jsonpath "$.detail" contains "does not support custom speakers"
 
 
-# 14. Delete the Japanese speaker successfully
-DELETE {{base_url}}/api/v1/speakers/{{speaker_id_jp}}?model_id=qwen3-tts-custom
+# 17. Delete the Japanese speaker successfully
+DELETE {{base_url}}/api/v1/speakers/{{speaker_id_jp}}?model_id=qwen3-tts-voice-clone
 Authorization: Bearer {{token}}
 HTTP 200
 [Asserts]
@@ -192,8 +243,8 @@ jsonpath "$.status" == "ok"
 jsonpath "$.message" == "Speaker deleted successfully"
 
 
-# 15. Verify the Japanese speaker is no longer in the list
-GET {{base_url}}/api/v1/speakers?model_id=qwen3-tts-custom
+# 18. Verify the Japanese speaker is no longer in the list
+GET {{base_url}}/api/v1/speakers?model_id=qwen3-tts-voice-clone
 Authorization: Bearer {{token}}
 HTTP 200
 [Asserts]
@@ -201,70 +252,67 @@ jsonpath "$.status" == "ok"
 jsonpath "$.speakers[*].id" not includes {{speaker_id_jp}}
 
 
-# 16. Try to use the deleted speaker for generation (should fail)
+# 19. Try to use the deleted speaker for generation (should fail)
 POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-custom",
+  "model_id": "qwen3-tts-voice-clone",
   "text": "This should fail",
-  "language": "en",
-  "speaker": "{{speaker_id_jp}}",
-  "instruct": "Test"
+  "language": "english",
+  "speaker": "{{speaker_id_jp}}"
 }
 HTTP 400
 [Asserts]
 jsonpath "$.detail" contains "Unsupported speaker"
 
 
-# 17. Delete the first speaker
-DELETE {{base_url}}/api/v1/speakers/{{speaker_id}}?model_id=qwen3-tts-custom
+# 20. Delete the first speaker
+DELETE {{base_url}}/api/v1/speakers/{{speaker_id}}?model_id=qwen3-tts-voice-clone
 Authorization: Bearer {{token}}
 HTTP 200
 [Asserts]
 jsonpath "$.status" == "ok"
 
 
-# 18. Delete the second speaker
-DELETE {{base_url}}/api/v1/speakers/{{speaker_id_2}}?model_id=qwen3-tts-custom
+# 21. Delete the second speaker
+DELETE {{base_url}}/api/v1/speakers/{{speaker_id_2}}?model_id=qwen3-tts-voice-clone
 Authorization: Bearer {{token}}
 HTTP 200
 [Asserts]
 jsonpath "$.status" == "ok"
 
 
-# 19. Test creating speaker without authentication (should fail)
+# 22. Test creating speaker without authentication (should fail)
 POST {{base_url}}/api/v1/speakers
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-custom",
+  "model_id": "qwen3-tts-voice-clone",
   "name": "Unauthorized Voice",
   "text": "This should fail without auth.",
-  "language": "en",
-  "instruct": "Test voice"
+  "audio": "{{reference_audio}}"
 }
 HTTP 401
 
 
-# 20. Test getting speakers without authentication (should fail)
-GET {{base_url}}/api/v1/speakers?model_id=qwen3-tts-custom
+# 23. Test getting speakers without authentication (should fail)
+GET {{base_url}}/api/v1/speakers?model_id=qwen3-tts-voice-clone
 HTTP 401
 
 
-# 21. Test deleting speaker without authentication (should fail)
-DELETE {{base_url}}/api/v1/speakers/00000000-0000-0000-0000-000000000000?model_id=qwen3-tts-custom
+# 24. Test deleting speaker without authentication (should fail)
+DELETE {{base_url}}/api/v1/speakers/00000000-0000-0000-0000-000000000000?model_id=qwen3-tts-voice-clone
 HTTP 401
 
 
-# 22. Test with invalid token for speaker creation (should fail)
+# 25. Test with invalid token for speaker creation (should fail)
 POST {{base_url}}/api/v1/speakers
 Authorization: Bearer invalid-token-here
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-custom",
+  "model_id": "qwen3-tts-voice-clone",
   "name": "Invalid Token Voice",
   "text": "This should fail with invalid token.",
-  "language": "en",
-  "instruct": "Test voice"
+  "audio": "{{reference_audio}}"
 }
 HTTP 401

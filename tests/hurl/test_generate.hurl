@@ -406,7 +406,137 @@ jsonpath "$.wavs[0]" exists
 jsonpath "$.sampling_rate" == 24000
 
 
-# 26. Test without authentication (should fail)
+# =============================================
+# Voice Design Model Tests (qwen3-tts-voice-design)
+# =============================================
+
+# 26. Basic voice design generation
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
+Content-Type: application/json
+{
+  "model_id": "qwen3-tts-voice-design",
+  "text": "Hello, this is a test of voice design.",
+  "language": "english",
+  "speaker": "generated",
+  "instruct": "A young female with an energetic and cheerful tone"
+}
+HTTP 200
+[Asserts]
+jsonpath "$.status" == "ok"
+jsonpath "$.wavs" isCollection
+jsonpath "$.wavs[0]" exists
+jsonpath "$.sampling_rate" == 24000
+
+
+# 27. Voice design with different voice characteristics
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
+Content-Type: application/json
+{
+  "model_id": "qwen3-tts-voice-design",
+  "text": "Welcome to our professional service.",
+  "language": "english",
+  "speaker": "generated",
+  "instruct": "A deep male voice, calm and authoritative"
+}
+HTTP 200
+[Asserts]
+jsonpath "$.status" == "ok"
+jsonpath "$.wavs[0]" exists
+jsonpath "$.sampling_rate" == 24000
+
+
+# 28. Voice design without instruct (should fail)
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
+Content-Type: application/json
+{
+  "model_id": "qwen3-tts-voice-design",
+  "text": "This should fail without instruct.",
+  "language": "english",
+  "speaker": "generated"
+}
+HTTP 400
+[Asserts]
+jsonpath "$.detail" contains "Instruct is required"
+
+
+# 29. Voice design with invalid speaker (should fail - must be "generated")
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
+Content-Type: application/json
+{
+  "model_id": "qwen3-tts-voice-design",
+  "text": "This should fail with invalid speaker.",
+  "language": "english",
+  "speaker": "Vivian",
+  "instruct": "A cheerful voice"
+}
+HTTP 400
+[Asserts]
+jsonpath "$.detail" contains "Unsupported speaker"
+
+
+# 30. Voice design in Chinese
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
+Content-Type: application/json
+{
+  "model_id": "qwen3-tts-voice-design",
+  "text": "你好，这是语音设计测试。",
+  "language": "chinese",
+  "speaker": "generated",
+  "instruct": "温柔的女性声音"
+}
+HTTP 200
+[Asserts]
+jsonpath "$.status" == "ok"
+jsonpath "$.wavs[0]" exists
+
+
+# 31. Voice design in Japanese
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
+Content-Type: application/json
+{
+  "model_id": "qwen3-tts-voice-design",
+  "text": "こんにちは、音声デザインのテストです。",
+  "language": "japanese",
+  "speaker": "generated",
+  "instruct": "明るく元気な若い女性の声"
+}
+HTTP 200
+[Asserts]
+jsonpath "$.status" == "ok"
+jsonpath "$.wavs[0]" exists
+
+
+# 32. Voice design with sampling parameters
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
+Content-Type: application/json
+{
+  "model_id": "qwen3-tts-voice-design",
+  "text": "Testing with custom sampling parameters.",
+  "language": "english",
+  "speaker": "generated",
+  "instruct": "A warm and friendly voice",
+  "top_k": 50,
+  "top_p": 0.9,
+  "temperature": 0.7
+}
+HTTP 200
+[Asserts]
+jsonpath "$.status" == "ok"
+jsonpath "$.wavs[0]" exists
+
+
+# =============================================
+# Authentication Tests
+# =============================================
+
+# 33. Test without authentication (should fail)
 POST {{base_url}}/api/v1/generate
 Content-Type: application/json
 {
@@ -418,7 +548,7 @@ Content-Type: application/json
 HTTP 401
 
 
-# 27. Test with invalid token (should fail)
+# 34. Test with invalid token (should fail)
 POST {{base_url}}/api/v1/generate
 Authorization: Bearer invalid-token-here
 Content-Type: application/json
