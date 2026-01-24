@@ -147,7 +147,7 @@ jobs:
 
             - name: Run hurl tests
               run: |
-                  hurl --variables-file tests/hurl/vars.env --test --max-time 300 --parallel 1 tests/hurl/*.hurl
+                  hurl --variables-file tests/hurl/vars.env --test --max-time 300 --jobs 1 tests/hurl/*.hurl
 
             - name: Stop server
               if: always()
