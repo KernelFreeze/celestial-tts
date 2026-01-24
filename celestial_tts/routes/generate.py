@@ -1,6 +1,8 @@
 import base64
+import io
 from typing import List, Literal, Optional, Union
 
+import soundfile as sf
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel
@@ -104,8 +106,13 @@ async def generate(
             request.max_new_tokens,
         )
 
-        # Serialize wavs to base64
-        base64_wavs = [base64.b64encode(wav).decode("utf-8") for wav in wavs]
+        # Encode as proper WAV files and serialize to base64
+        base64_wavs = []
+        for wav in wavs:
+            buffer = io.BytesIO()
+            sf.write(buffer, wav, sr, format="WAV")
+            buffer.seek(0)
+            base64_wavs.append(base64.b64encode(buffer.read()).decode("utf-8"))
         return GenerateResponse(
             status="ok",
             wavs=base64_wavs,
