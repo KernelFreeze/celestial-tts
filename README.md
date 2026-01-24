@@ -520,6 +520,83 @@ curl -X POST http://localhost:8080/api/v1/generate \
   }' | jq -r '.wavs[0]' | base64 -d > output.wav
 ```
 
+## Testing
+
+Celestial TTS includes comprehensive test suites using both pytest (Python) and hurl (HTTP).
+
+### Running Tests with pytest
+
+The pytest test suite tests the OpenAI-compatible API using the official OpenAI Python client.
+
+```bash
+# Install test dependencies
+uv sync --extra test
+
+# Or with pip
+pip install -e ".[test]"
+
+# Start the server in one terminal
+uv run celestial-tts
+
+# In another terminal, set your token and run tests
+export CELESTIAL_TTS_TOKEN="sk-ct-v1-..."
+pytest tests/test_openai_client.py -v
+
+# Run specific test classes
+pytest tests/test_openai_client.py::TestVoiceMapping -v
+pytest tests/test_openai_client.py::TestAudioFormats -v
+
+# Run with custom base URL
+CELESTIAL_TTS_BASE_URL="http://localhost:8000/api/v1" pytest tests/test_openai_client.py -v
+```
+
+**Test Coverage:**
+- Basic speech generation (tts-1, tts-1-hd models)
+- All OpenAI voice names (alloy, echo, fable, onyx, nova, shimmer)
+- All native speaker names (Vivian, Dylan, etc.)
+- All audio formats (mp3, wav, opus, flac, pcm)
+- Speed parameter (0.25 to 4.0)
+- Multilingual content (10+ languages)
+- Error handling (invalid inputs, authentication)
+- Edge cases (long text, special characters, mixed languages)
+
+### Running Tests with hurl
+
+Hurl tests provide HTTP-level testing for all API endpoints.
+
+```bash
+# Install hurl (https://hurl.dev)
+# On Linux:
+curl -LO https://github.com/Orange-OpenSource/hurl/releases/download/5.0.1/hurl_5.0.1_amd64.deb
+sudo dpkg -i hurl_5.0.1_amd64.deb
+
+# On macOS:
+brew install hurl
+
+# Configure your token in tests/hurl/vars.env
+echo 'token=sk-ct-v1-YOUR_TOKEN_HERE' > tests/hurl/vars.env
+echo 'base_url=http://127.0.0.1:8080' >> tests/hurl/vars.env
+
+# Start the server
+uv run celestial-tts
+
+# Run all hurl tests
+hurl --variables-file tests/hurl/vars.env --test tests/hurl/*.hurl
+
+# Run specific test files
+hurl --variables-file tests/hurl/vars.env --test tests/hurl/test_openai_speech.hurl
+hurl --variables-file tests/hurl/vars.env --test tests/hurl/test_generate.hurl
+hurl --variables-file tests/hurl/vars.env --test tests/hurl/test_speakers.hurl
+
+# Run with verbose output
+hurl --variables-file tests/hurl/vars.env --test --verbose tests/hurl/test_openai_speech.hurl
+```
+
+**Available Test Files:**
+- `test_openai_speech.hurl` - OpenAI-compatible /v1/audio/speech endpoint (48 tests)
+- `test_generate.hurl` - Native /v1/generate endpoint with all models (34 tests)
+- `test_speakers.hurl` - Speaker management and voice cloning (25 tests)
+
 ## License
 
 MIT License

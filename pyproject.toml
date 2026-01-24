@@ -23,6 +23,12 @@ dependencies = [
     "uuid-utils>=0.14.0",
 ]
 
+[project.optional-dependencies]
+test = [
+    "openai>=1.59.7",
+    "pytest>=8.3.4",
+]
+
 [project.scripts]
 celestial-tts = "main:cli_app"
 celestial-tts-create-token = "create_token:app"
