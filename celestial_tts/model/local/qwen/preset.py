@@ -8,7 +8,20 @@ from celestial_tts.database import Database
 from celestial_tts.model.local import LocalTTSModel
 from celestial_tts.model.types import NonEmptyStr
 
-Language = Literal["zh", "en", "ja", "ko", "de", "fr", "ru", "pt", "es", "it"]
+Language = Literal[
+    "auto",
+    "chinese",
+    "english",
+    "french",
+    "german",
+    "italian",
+    "japanese",
+    "korean",
+    "portuguese",
+    "russian",
+    "spanish",
+]
+
 Speaker = Literal[
     "Vivian",
     "Serena",
@@ -38,6 +51,20 @@ class QwenTTSPreset(LocalTTSModel[Language, Speaker]):
         model: Qwen3TTSModel,
     ):
         super().__init__(model=model)
+
+    async def str_to_language(
+        self, database: Database, language_str: str
+    ) -> Optional[Language]:
+        if language_str not in SUPPORTED_LANGUAGES:
+            return None
+        return language_str
+
+    async def str_to_speaker(
+        self, database: Database, speaker_str: str
+    ) -> Optional[Speaker]:
+        if speaker_str not in SUPPORTED_SPEAKERS:
+            return None
+        return speaker_str
 
     async def get_supported_languages(self, database: Database) -> Set[Language]:
         return SUPPORTED_LANGUAGES

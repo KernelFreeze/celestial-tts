@@ -3,6 +3,7 @@ from typing import Any, ClassVar, List, Literal, Optional, Set, Tuple, Union, ge
 from uuid import UUID
 
 import numpy as np
+from fastapi import HTTPException
 from qwen_tts import Qwen3TTSModel
 
 from celestial_tts.database import Database
@@ -14,7 +15,19 @@ from celestial_tts.database.model.custom_speaker import QwenCustomSpeaker
 from celestial_tts.database.utils import qwen_speaker_from_prompt
 from celestial_tts.model.local import LocalTTSModel, NonEmptyStr
 
-Language = Literal["zh", "en", "ja", "ko", "de", "fr", "ru", "pt", "es", "it"]
+Language = Literal[
+    "auto",
+    "chinese",
+    "english",
+    "french",
+    "german",
+    "italian",
+    "japanese",
+    "korean",
+    "portuguese",
+    "russian",
+    "spanish",
+]
 
 SUPPORTED_LANGUAGES: Set[Language] = set(get_args(Language))
 
@@ -75,7 +88,7 @@ class QwenTTSCustom(LocalTTSModel[Language, QwenCustomSpeaker]):
         try:
             uuid = UUID(speaker_str)
         except ValueError:
-            raise ValueError(f"Invalid speaker UUID: {speaker_str}")
+            raise HTTPException(400, f"Invalid speaker UUID: {speaker_str}")
         return await select_qwen_custom_speaker_by_id(database, uuid)
 
     async def get_supported_languages(self, database: Database) -> Set[Language]:

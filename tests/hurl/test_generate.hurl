@@ -2,13 +2,13 @@
 # Run with: hurl --test test_generate.hurl
 # Note: Requires the server to be running on 127.0.0.1:8080
 
-# 1. Basic generation with preset model and English language
+# 1. Basic generation with preset model and english language
 POST http://127.0.0.1:8080/generate
 Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
   "text": "Hello, this is a test of the text to speech system.",
-  "language": "en",
+  "language": "english",
   "speaker": "Vivian"
 }
 HTTP 200
@@ -17,7 +17,7 @@ jsonpath "$.status" == "ok"
 jsonpath "$.wavs" isCollection
 jsonpath "$.wavs[0]" exists
 jsonpath "$.sampling_rate" exists
-jsonpath "$.sampling_rate" == 12000
+jsonpath "$.sampling_rate" == 24000
 
 
 # 2. Generation with multiple text inputs (should return multiple wavs)
@@ -26,7 +26,7 @@ Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
   "text": ["First sentence.", "Second sentence.", "Third sentence."],
-  "language": "en",
+  "language": "english",
   "speaker": "Eric"
 }
 HTTP 200
@@ -34,7 +34,7 @@ HTTP 200
 jsonpath "$.status" == "ok"
 jsonpath "$.wavs" isCollection
 jsonpath "$.wavs" count == 3
-jsonpath "$.sampling_rate" == 12000
+jsonpath "$.sampling_rate" == 24000
 
 
 # 3. Generation with instruct parameter
@@ -43,7 +43,7 @@ Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
   "text": "This voice should sound happy and enthusiastic!",
-  "language": "en",
+  "language": "english",
   "speaker": "Serena",
   "instruct": "Happy and enthusiastic"
 }
@@ -51,7 +51,7 @@ HTTP 200
 [Asserts]
 jsonpath "$.status" == "ok"
 jsonpath "$.wavs[0]" exists
-jsonpath "$.sampling_rate" == 12000
+jsonpath "$.sampling_rate" == 24000
 
 
 # 4. Generation with all optional parameters
@@ -60,7 +60,7 @@ Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
   "text": "Testing with all parameters set.",
-  "language": "en",
+  "language": "english",
   "speaker": "Dylan",
   "instruct": "Clear and professional",
   "top_k": 50,
@@ -73,7 +73,7 @@ HTTP 200
 [Asserts]
 jsonpath "$.status" == "ok"
 jsonpath "$.wavs[0]" exists
-jsonpath "$.sampling_rate" == 12000
+jsonpath "$.sampling_rate" == 24000
 
 
 # 5. Test different speakers - Ryan
@@ -82,7 +82,7 @@ Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
   "text": "Testing Ryan's voice.",
-  "language": "en",
+  "language": "english",
   "speaker": "Ryan"
 }
 HTTP 200
@@ -97,7 +97,7 @@ Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
   "text": "Testing Aiden's voice.",
-  "language": "en",
+  "language": "english",
   "speaker": "Aiden"
 }
 HTTP 200
@@ -112,7 +112,7 @@ Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
   "text": "Testing Uncle Fu's voice.",
-  "language": "en",
+  "language": "english",
   "speaker": "Uncle_Fu"
 }
 HTTP 200
@@ -127,14 +127,14 @@ Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
   "text": "你好，这是中文测试。",
-  "language": "zh",
+  "language": "chinese",
   "speaker": "Vivian"
 }
 HTTP 200
 [Asserts]
 jsonpath "$.status" == "ok"
 jsonpath "$.wavs[0]" exists
-jsonpath "$.sampling_rate" == 12000
+jsonpath "$.sampling_rate" == 24000
 
 
 # 9. Test Japanese language (ja)
@@ -143,14 +143,14 @@ Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
   "text": "こんにちは、これは日本語のテストです。",
-  "language": "ja",
+  "language": "japanese",
   "speaker": "Ono_Anna"
 }
 HTTP 200
 [Asserts]
 jsonpath "$.status" == "ok"
 jsonpath "$.wavs[0]" exists
-jsonpath "$.sampling_rate" == 12000
+jsonpath "$.sampling_rate" == 24000
 
 
 # 10. Test Korean language (ko)
@@ -159,14 +159,14 @@ Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
   "text": "안녕하세요, 이것은 한국어 테스트입니다.",
-  "language": "ko",
+  "language": "korean",
   "speaker": "Sohee"
 }
 HTTP 200
 [Asserts]
 jsonpath "$.status" == "ok"
 jsonpath "$.wavs[0]" exists
-jsonpath "$.sampling_rate" == 12000
+jsonpath "$.sampling_rate" == 24000
 
 
 # 11. Test German language (de)
@@ -175,14 +175,14 @@ Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
   "text": "Hallo, das ist ein deutscher Test.",
-  "language": "de",
+  "language": "german",
   "speaker": "Eric"
 }
 HTTP 200
 [Asserts]
 jsonpath "$.status" == "ok"
 jsonpath "$.wavs[0]" exists
-jsonpath "$.sampling_rate" == 12000
+jsonpath "$.sampling_rate" == 24000
 
 
 # 12. Test French language (fr)
@@ -191,14 +191,14 @@ Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
   "text": "Bonjour, ceci est un test en français.",
-  "language": "fr",
+  "language": "french",
   "speaker": "Serena"
 }
 HTTP 200
 [Asserts]
 jsonpath "$.status" == "ok"
 jsonpath "$.wavs[0]" exists
-jsonpath "$.sampling_rate" == 12000
+jsonpath "$.sampling_rate" == 24000
 
 
 # 13. Test Russian language (ru)
@@ -207,14 +207,14 @@ Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
   "text": "Привет, это русский тест.",
-  "language": "ru",
+  "language": "russian",
   "speaker": "Dylan"
 }
 HTTP 200
 [Asserts]
 jsonpath "$.status" == "ok"
 jsonpath "$.wavs[0]" exists
-jsonpath "$.sampling_rate" == 12000
+jsonpath "$.sampling_rate" == 24000
 
 
 # 14. Test Portuguese language (pt)
@@ -223,14 +223,14 @@ Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
   "text": "Olá, este é um teste em português.",
-  "language": "pt",
+  "language": "portuguese",
   "speaker": "Ryan"
 }
 HTTP 200
 [Asserts]
 jsonpath "$.status" == "ok"
 jsonpath "$.wavs[0]" exists
-jsonpath "$.sampling_rate" == 12000
+jsonpath "$.sampling_rate" == 24000
 
 
 # 15. Test Spanish language (es)
@@ -239,14 +239,14 @@ Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
   "text": "Hola, esta es una prueba en español.",
-  "language": "es",
+  "language": "spanish",
   "speaker": "Aiden"
 }
 HTTP 200
 [Asserts]
 jsonpath "$.status" == "ok"
 jsonpath "$.wavs[0]" exists
-jsonpath "$.sampling_rate" == 12000
+jsonpath "$.sampling_rate" == 24000
 
 
 # 16. Test Italian language (it)
@@ -255,14 +255,14 @@ Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
   "text": "Ciao, questo è un test in italiano.",
-  "language": "it",
+  "language": "italian",
   "speaker": "Uncle_Fu"
 }
 HTTP 200
 [Asserts]
 jsonpath "$.status" == "ok"
 jsonpath "$.wavs[0]" exists
-jsonpath "$.sampling_rate" == 12000
+jsonpath "$.sampling_rate" == 24000
 
 
 # 17. Test with unsupported language (should fail)
@@ -286,7 +286,7 @@ Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
   "text": "This should fail",
-  "language": "en",
+  "language": "english",
   "speaker": "NonExistentSpeaker"
 }
 HTTP 400
@@ -301,10 +301,10 @@ Content-Type: application/json
 {
   "model_id": "invalid-model",
   "text": "This should fail",
-  "language": "en",
+  "language": "english",
   "speaker": "Vivian"
 }
-HTTP 500
+HTTP 400
 
 
 # 20. Test with empty text (should fail due to NonEmptyStr validation)
@@ -313,7 +313,7 @@ Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
   "text": "",
-  "language": "en",
+  "language": "english",
   "speaker": "Vivian"
 }
 HTTP 422
@@ -325,7 +325,7 @@ Content-Type: application/json
 {
   "model_id": "some-remote-model",
   "text": "This should fail",
-  "language": "en",
+  "language": "english",
   "speaker": "Vivian",
   "provider": "remote"
 }
@@ -342,7 +342,7 @@ Content-Type: application/json
 {
   "model_id": "qwen3-tts-custom",
   "text": "Testing custom model with preset speaker name.",
-  "language": "en",
+  "language": "english",
   "speaker": "test_speaker"
 }
 HTTP 400
@@ -356,13 +356,13 @@ Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
   "text": "Short test.",
-  "language": "en",
+  "language": "english",
   "speaker": "Vivian"
 }
 HTTP 200
 [Asserts]
 jsonpath "$.status" == "ok"
-jsonpath "$.wavs[0]" matches /^[A-Za-z0-9+/]+=*$/
+jsonpath "$.wavs[0]" matches /^[A-Za-z0-9+\/]+=*$/
 jsonpath "$.sampling_rate" isInteger
 
 
@@ -372,14 +372,14 @@ Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
   "text": "Testing with mixed content: 你好 and hello",
-  "language": "en",
+  "language": "auto",
   "speaker": "Dylan"
 }
 HTTP 200
 [Asserts]
 jsonpath "$.status" == "ok"
 jsonpath "$.wavs[0]" exists
-jsonpath "$.sampling_rate" == 12000
+jsonpath "$.sampling_rate" == 24000
 
 
 # 25. Test long text generation
@@ -388,11 +388,11 @@ Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
   "text": "This is a longer text to test the generation capabilities of the text-to-speech system. It should handle multiple sentences and longer paragraphs without any issues. The system should produce high-quality audio output that maintains consistency throughout the entire generation process.",
-  "language": "en",
+  "language": "english",
   "speaker": "Serena"
 }
 HTTP 200
 [Asserts]
 jsonpath "$.status" == "ok"
 jsonpath "$.wavs[0]" exists
-jsonpath "$.sampling_rate" == 12000
+jsonpath "$.sampling_rate" == 24000

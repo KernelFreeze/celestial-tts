@@ -1,6 +1,7 @@
 from enum import Enum
 
 import torch
+from fastapi.exceptions import HTTPException
 from qwen_tts import Qwen3TTSModel
 
 from celestial_tts.model.local import LocalTTSModel
@@ -17,7 +18,7 @@ class LocalTTSType(Enum):
         for member in cls:
             if member.value == value:
                 return member
-        raise ValueError(f"Unknown local TTS type: {value}")
+        raise HTTPException(400, f"Unknown local TTS type: {value}")
 
 
 class LocalTTSFactory:
