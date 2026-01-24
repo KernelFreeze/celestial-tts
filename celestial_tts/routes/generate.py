@@ -61,7 +61,7 @@ class GenerateResponse(BaseModel):
     )
 
 
-router = APIRouter()
+router = APIRouter(tags=["generate"])
 
 
 @router.post("/generate", response_model=GenerateResponse)

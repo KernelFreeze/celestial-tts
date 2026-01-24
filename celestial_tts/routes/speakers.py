@@ -63,7 +63,7 @@ class DeleteSpeakerResponse(BaseModel):
     message: str = Field(description="A human-readable message describing the result")
 
 
-router = APIRouter()
+router = APIRouter(tags=["speakers"])
 
 
 @router.get("/speakers", response_model=GetSpeakersResponse)
@@ -167,7 +167,7 @@ async def create_speaker(
         return SpeakerResponse(
             status="ok",
             speaker=SpeakerInfo(
-                id=str(speaker.id),
+                id=speaker.id,
                 name=speaker.name,
                 created_at=speaker.created_at.isoformat(),
             ),

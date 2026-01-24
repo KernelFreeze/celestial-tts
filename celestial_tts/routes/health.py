@@ -3,7 +3,7 @@ from typing import Literal
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-router = APIRouter()
+router = APIRouter(tags=["health"])
 
 
 Status = Literal["ok", "error"]

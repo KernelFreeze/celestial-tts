@@ -5,9 +5,10 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from .model.auth_token import AuthToken
 from .model.custom_speaker import QwenCustomSpeaker
 
-__all__ = ["Database", "QwenCustomSpeaker"]
+__all__ = ["Database", "QwenCustomSpeaker", "AuthToken"]
 
 
 class Database:
