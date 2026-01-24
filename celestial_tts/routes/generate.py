@@ -3,6 +3,7 @@ from typing import List, Optional, Union
 
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
+from pydantic import BaseModel
 
 from celestial_tts.config import Config
 from celestial_tts.database import Database
@@ -11,32 +12,37 @@ from celestial_tts.model import ModelState
 from celestial_tts.model.local.factory import LocalTTSFactory, LocalTTSType
 from celestial_tts.model.types import NonEmptyStr
 
+
+class GenerateRequest(BaseModel):
+    model_id: str
+    text: Union[NonEmptyStr, List[NonEmptyStr]]
+    language: str
+    speaker: str
+    instruct: Optional[NonEmptyStr] = None
+    top_k: Optional[int] = None
+    top_p: Optional[float] = None
+    temperature: Optional[float] = None
+    repetition_penalty: Optional[float] = None
+    max_new_tokens: Optional[int] = None
+    provider: str = "local"
+
+
 router = APIRouter()
 
 
 @router.post("/generate")
 async def generate(
-    model_id: str,
-    text: Union[NonEmptyStr, List[NonEmptyStr]],
-    language: str,
-    speaker: str,
-    instruct: Optional[NonEmptyStr] = None,
-    top_k: Optional[int] = None,
-    top_p: Optional[float] = None,
-    temperature: Optional[float] = None,
-    repetition_penalty: Optional[float] = None,
-    max_new_tokens: Optional[int] = None,
-    provider: str = "local",
+    request: GenerateRequest,
     config: Config = Depends(get_config),
     models: ModelState = Depends(get_models),
     database: Database = Depends(get_database),
 ):
     """Generate a text-to-speech audio."""
-    if provider == "local":
+    if request.provider == "local":
         if models.local_state is None:
             raise HTTPException(status_code=500, detail="Local state not initialized")
 
-        model_type = LocalTTSType.from_str(model_id)
+        model_type = LocalTTSType.from_str(request.model_id)
         model = models.local_state.model_cache.get_or_put(
             model_type,
             lambda: LocalTTSFactory.create(
@@ -47,40 +53,40 @@ async def generate(
             raise HTTPException(status_code=404, detail="Model not found")
 
         # Validate language
-        language_type = await model.str_to_language(database, language)
+        language_type = await model.str_to_language(database, request.language)
         if language_type is None:
             supported = await model.get_supported_languages(database)
             raise HTTPException(
                 status_code=400,
-                detail=f"Unsupported language '{language}'. Supported: {sorted(supported)}",
+                detail=f"Unsupported language '{request.language}'. Supported: {sorted(supported)}",
             )
 
         # Validate speaker
-        speaker_type = await model.str_to_speaker(database, speaker)
+        speaker_type = await model.str_to_speaker(database, request.speaker)
         if speaker_type is None:
             supported = await model.get_supported_speakers(database)
             if supported is not None:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"Unsupported speaker '{speaker}'. Supported: {sorted(supported)}",
+                    detail=f"Unsupported speaker '{request.speaker}'. Supported: {sorted(supported)}",
                 )
             else:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"Unsupported speaker '{speaker}'",
+                    detail=f"Unsupported speaker '{request.speaker}'",
                 )
 
         wavs, sr = await model.generate_voice(
             database,
-            text,
+            request.text,
             language_type,
             speaker_type,
-            instruct,
-            top_k,
-            top_p,
-            temperature,
-            repetition_penalty,
-            max_new_tokens,
+            request.instruct,
+            request.top_k,
+            request.top_p,
+            request.temperature,
+            request.repetition_penalty,
+            request.max_new_tokens,
         )
 
         # Serialize wavs to base64
