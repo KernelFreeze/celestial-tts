@@ -26,13 +26,18 @@ jobs:
               with:
                   enable-cache: true
 
+            - name: Install system dependencies
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y libsox-dev
+
             - name: Install dependencies
               run: |
                   uv sync --extra test
 
             - name: Create bootstrap token
               run: |
-                  TOKEN=$(uv run celestial-tts-create-token --name "CI Test Token" --expires-in 1 2>&1 | grep "Token:" | awk '{print $2}')
+                  TOKEN=$(uv run celestial-tts-create-token --name "CI Test Token" --expires-in 1 --quiet 2>/dev/null)
                   echo "CELESTIAL_TTS_TOKEN=$TOKEN" >> $GITHUB_ENV
                   echo "Created token for testing"
 
@@ -96,6 +101,11 @@ jobs:
               with:
                   enable-cache: true
 
+            - name: Install system dependencies
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y libsox-dev
+
             - name: Install dependencies
               run: |
                   uv sync
@@ -109,7 +119,7 @@ jobs:
 
             - name: Create bootstrap token
               run: |
-                  TOKEN=$(uv run celestial-tts-create-token --name "CI Test Token" --expires-in 1 2>&1 | grep "Token:" | awk '{print $2}')
+                  TOKEN=$(uv run celestial-tts-create-token --name "CI Test Token" --expires-in 1 --quiet 2>/dev/null)
                   echo "token=$TOKEN" > tests/hurl/vars.env
                   echo "base_url=http://127.0.0.1:8080" >> tests/hurl/vars.env
                   echo "Created token for testing"
@@ -137,7 +147,7 @@ jobs:
 
             - name: Run hurl tests
               run: |
-                  hurl --variables-file tests/hurl/vars.env --test tests/hurl/*.hurl
+                  hurl --variables-file tests/hurl/vars.env --test --max-time 300 --parallel 1 tests/hurl/*.hurl
 
             - name: Stop server
               if: always()

@@ -81,7 +81,7 @@ HTTP 200
 jsonpath "$.status" == "ok"
 jsonpath "$.speakers" isCollection
 jsonpath "$.speakers[*].id" includes {{speaker_id}}
-jsonpath "$.speakers[?(@.id == '{{speaker_id}}')].name" contains "Friendly Voice"
+jsonpath "$.speakers[?(@.id == '{{speaker_id}}')].name" includes "Friendly Voice"
 
 
 # 6. Get speakers for preset model (should return empty list)
