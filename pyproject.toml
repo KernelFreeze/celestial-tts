@@ -24,7 +24,7 @@ dependencies = [
 ]
 
 [project.scripts]
-celestial-tts = "main:main"
+celestial-tts = "main:cli_app"
 celestial-tts-create-token = "create_token:app"
 
 [build-system]

@@ -61,6 +61,15 @@ pip install -e .
 
 ## Quick Start
 
+### Using uv
+```bash
+uv run celestial-tts
+
+# Run with custom host/port
+uv run celestial-tts --host 0.0.0.0 --port 8000
+```
+
+### Or using pip
 ```bash
 # Run with defaults (localhost:8080)
 python main.py
@@ -79,13 +88,13 @@ Before using protected endpoints, create a bootstrap token using the CLI:
 
 ```bash
 # Create a token that never expires
-celestial-tts-create-token --name "My API Token"
+uv run celestial-tts-create-token --name "My API Token"
 
 # Create a token that expires in 30 days
-celestial-tts-create-token --name "Temporary Token" --expires-in 30
+uv run celestial-tts-create-token --name "Temporary Token" --expires-in 30
 
 # Short flags
-celestial-tts-create-token -n "Dev Token" -e 7
+uv run celestial-tts-create-token -n "Dev Token" -e 7
 ```
 
 The command outputs the token details:
@@ -275,6 +284,8 @@ DELETE /speakers/{speaker_id}?model_id=qwen3-tts-custom
 ```
 
 ## Models
+
+For now, only the following local models are supported. I plan to add support for remote API end-points and more local models in the future.
 
 ### qwen3-tts-preset
 
