@@ -3,7 +3,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from celestial_tts.config import Config
 from celestial_tts.database import Database
@@ -20,57 +20,47 @@ Status = Literal["ok", "error"]
 
 
 class CreateSpeakerRequest(BaseModel):
-    model_id: str
-    """The ID of the model to create the speaker for"""
-    name: str
-    """The name of the speaker"""
-    text: Union[NonEmptyStr, List[NonEmptyStr]]
-    """The text to use for the speaker"""
-    language: str
-    """The language of the speaker"""
-    instruct: Union[NonEmptyStr, List[NonEmptyStr]]
-    """The instructions for the speaker"""
-    provider: str = "local"
-    """The provider of the speaker"""
+    model_id: str = Field(description="The ID of the model to create the speaker for")
+    name: str = Field(description="The name of the speaker")
+    text: Union[NonEmptyStr, List[NonEmptyStr]] = Field(
+        description="The reference text for voice design"
+    )
+    language: str = Field(description="The language code for the speaker")
+    instruct: Union[NonEmptyStr, List[NonEmptyStr]] = Field(
+        description="Voice design instructions (e.g., 'A young female with energetic tone')"
+    )
+    provider: str = Field(default="local", description="The model provider")
 
 
 class DeleteSpeakerRequest(BaseModel):
-    model_id: str
-    """The ID of the model to delete the speaker for"""
-    speaker_id: UUID
-    """The ID of the speaker to delete"""
-    provider: str = "local"
-    """The provider of the speaker"""
+    model_id: str = Field(description="The ID of the model to delete the speaker for")
+    speaker_id: UUID = Field(description="The UUID of the speaker to delete")
+    provider: str = Field(default="local", description="The model provider")
 
 
 class SpeakerInfo(BaseModel):
-    id: UUID
-    """The ID of the speaker"""
-    name: str
-    """The name of the speaker"""
-    created_at: Optional[str] = None
-    """The date and time the speaker was created"""
+    id: UUID = Field(description="The unique identifier of the speaker")
+    name: str = Field(description="The display name of the speaker")
+    created_at: Optional[str] = Field(
+        default=None, description="ISO 8601 timestamp of when the speaker was created"
+    )
 
 
 class GetSpeakersResponse(BaseModel):
-    status: Status
-    """The status of the request"""
-    speakers: List[SpeakerInfo] | List[str]
-    """The list of speakers"""
+    status: Status = Field(description="The status of the request ('ok' or 'error')")
+    speakers: List[SpeakerInfo] | List[str] = Field(
+        description="List of available speakers (SpeakerInfo for custom, strings for preset)"
+    )
 
 
 class SpeakerResponse(BaseModel):
-    status: Status
-    """The status of the request"""
-    speaker: SpeakerInfo
-    """The speaker information"""
+    status: Status = Field(description="The status of the request ('ok' or 'error')")
+    speaker: SpeakerInfo = Field(description="The created speaker information")
 
 
 class DeleteSpeakerResponse(BaseModel):
-    status: Status
-    """The status of the request"""
-    message: str
-    """The message of the response"""
+    status: Status = Field(description="The status of the request ('ok' or 'error')")
+    message: str = Field(description="A human-readable message describing the result")
 
 
 router = APIRouter()

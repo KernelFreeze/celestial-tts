@@ -5,7 +5,7 @@ from typing import List, Literal, Optional, Union
 import soundfile as sf
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from celestial_tts.config import Config
 from celestial_tts.database import Database
@@ -18,30 +18,47 @@ Status = Literal["ok", "error"]
 
 
 class GenerateRequest(BaseModel):
-    model_id: str
-    text: Union[NonEmptyStr, List[NonEmptyStr]]
-    language: str
-    speaker: str
-    instruct: Optional[NonEmptyStr] = None
-    top_k: Optional[int] = None
-    top_p: Optional[float] = None
-    temperature: Optional[float] = None
-    repetition_penalty: Optional[float] = None
-    max_new_tokens: Optional[int] = None
-    provider: str = "local"
+    model_id: str = Field(
+        description="The model ID to use (e.g., 'qwen3-tts-preset' or 'qwen3-tts-custom')"
+    )
+    text: Union[NonEmptyStr, List[NonEmptyStr]] = Field(
+        description="Text to synthesize. Can be a single string or a list of strings."
+    )
+    language: str = Field(
+        description="Language code (e.g., 'en', 'zh', 'ja', 'ko', 'de', 'fr', 'ru', 'pt', 'es', 'it')"
+    )
+    speaker: str = Field(
+        description="Speaker name for preset models (e.g., 'Vivian') or UUID for custom speakers"
+    )
+    instruct: Optional[NonEmptyStr] = Field(
+        default=None, description="Voice instruction for controlling speech style"
+    )
+    top_k: Optional[int] = Field(default=None, description="Top-k sampling parameter")
+    top_p: Optional[float] = Field(
+        default=None, description="Top-p (nucleus) sampling parameter"
+    )
+    temperature: Optional[float] = Field(
+        default=None, description="Sampling temperature for generation"
+    )
+    repetition_penalty: Optional[float] = Field(
+        default=None, description="Repetition penalty for generation"
+    )
+    max_new_tokens: Optional[int] = Field(
+        default=None, description="Maximum number of new tokens to generate"
+    )
+    provider: str = Field(
+        default="local", description="Model provider ('local' for integrated models)"
+    )
 
 
 class GenerateResponse(BaseModel):
-    status: Status
-    """The status of the request"""
-    wavs: List[str]
-    """
-    The base64-encoded audio data.
-    Every entry in the list is a base64-encoded audio
-    file for every matching input text.
-    """
-    sampling_rate: int
-    """The sampling rate of the audio"""
+    status: Status = Field(description="The status of the request ('ok' or 'error')")
+    wavs: List[str] = Field(
+        description="List of base64-encoded WAV audio files, one for each input text"
+    )
+    sampling_rate: int = Field(
+        description="The sampling rate of all of the wav files in Hz"
+    )
 
 
 router = APIRouter()
