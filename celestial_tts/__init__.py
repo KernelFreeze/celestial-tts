@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from celestial_tts.config import Config
 from celestial_tts.database import Database
 from celestial_tts.model import ModelState
-from celestial_tts.routes import health
+from celestial_tts.routes import generate, health, speakers
 
 
 @asynccontextmanager
@@ -29,3 +29,5 @@ app.state.database = Database(app.state.config.database.url)
 app.state.models = ModelState(config=app.state.config)
 
 app.include_router(health.router)
+app.include_router(generate.router)
+app.include_router(speakers.router)

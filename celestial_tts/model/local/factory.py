@@ -42,7 +42,7 @@ class LocalTTSFactory:
                 "Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice",
                 device_map=device_map,
                 dtype=torch.bfloat16,
-                attn_implementation="flash_attention_2",
+                attn_implementation="sdpa",
             )
             return QwenTTSPreset(model=model)
         elif model_type == LocalTTSType.QWEN_CUSTOM:
@@ -50,13 +50,13 @@ class LocalTTSFactory:
                 "Qwen/Qwen3-TTS-12Hz-1.7B-Base",
                 device_map=device_map,
                 dtype=torch.bfloat16,
-                attn_implementation="flash_attention_2",
+                attn_implementation="sdpa",
             )
             design_model = Qwen3TTSModel.from_pretrained(
                 "Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign",
                 device_map=device_map,
                 dtype=torch.bfloat16,
-                attn_implementation="flash_attention_2",
+                attn_implementation="sdpa",
             )
             return QwenTTSCustom(clone_model=clone_model, design_model=design_model)
         else:

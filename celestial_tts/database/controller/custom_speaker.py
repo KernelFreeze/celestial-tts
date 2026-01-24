@@ -28,3 +28,17 @@ async def create_qwen_custom_speaker(database: Database, speaker: QwenCustomSpea
         await session.commit()
         await session.refresh(speaker)
         return speaker
+
+
+async def delete_qwen_custom_speaker(database: Database, id: UUID):
+    async with database.async_session() as session:
+        speaker = (
+            await session.exec(
+                select(QwenCustomSpeaker).where(QwenCustomSpeaker.id == id).limit(1)
+            )
+        ).first()
+        if speaker is None:
+            return False
+        await session.delete(speaker)
+        await session.commit()
+        return True
