@@ -239,7 +239,7 @@ DELETE {{base_url}}/api/v1/speakers
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-voice-clone",
+  "model_id": "qwen3-tts-preset",
   "speaker_id": "{{speaker_id}}",
   "provider": "local"
 }
@@ -281,9 +281,9 @@ Content-Type: application/json
   "language": "english",
   "speaker": "{{speaker_id_jp}}"
 }
-HTTP 400
+HTTP 404
 [Asserts]
-jsonpath "$.detail" contains "Unsupported speaker"
+jsonpath "$.detail" contains "not found"
 
 
 # 20. Delete the first speaker
