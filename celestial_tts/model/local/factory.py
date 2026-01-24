@@ -5,13 +5,15 @@ from fastapi.exceptions import HTTPException
 from qwen_tts import Qwen3TTSModel
 
 from celestial_tts.model.local import LocalTTSModel
-from celestial_tts.model.local.qwen.custom import QwenTTSCustom
+from celestial_tts.model.local.qwen.clone import QwenTTSClone
+from celestial_tts.model.local.qwen.design import QwenTTSDesign
 from celestial_tts.model.local.qwen.preset import QwenTTSPreset
 
 
 class LocalTTSType(Enum):
     QWEN_PRESET = "qwen3-tts-preset"
-    QWEN_CUSTOM = "qwen3-tts-custom"
+    QWEN_VOICE_CLONE = "qwen3-tts-voice-clone"
+    QWEN_VOICE_DESIGN = "qwen3-tts-voice-design"
 
     @classmethod
     def from_str(cls, value: str) -> "LocalTTSType":
@@ -46,19 +48,21 @@ class LocalTTSFactory:
                 attn_implementation="sdpa",
             )
             return QwenTTSPreset(model=model)
-        elif model_type == LocalTTSType.QWEN_CUSTOM:
-            clone_model = Qwen3TTSModel.from_pretrained(
+        elif model_type == LocalTTSType.QWEN_VOICE_CLONE:
+            model = Qwen3TTSModel.from_pretrained(
                 "Qwen/Qwen3-TTS-12Hz-1.7B-Base",
                 device_map=device_map,
                 dtype=torch.bfloat16,
                 attn_implementation="sdpa",
             )
-            design_model = Qwen3TTSModel.from_pretrained(
+            return QwenTTSClone(model=model)
+        elif model_type == LocalTTSType.QWEN_VOICE_DESIGN:
+            model = Qwen3TTSModel.from_pretrained(
                 "Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign",
                 device_map=device_map,
                 dtype=torch.bfloat16,
                 attn_implementation="sdpa",
             )
-            return QwenTTSCustom(clone_model=clone_model, design_model=design_model)
+            return QwenTTSDesign(model=model)
         else:
             raise ValueError(f"Unknown Qwen TTS model type: {model_type}")

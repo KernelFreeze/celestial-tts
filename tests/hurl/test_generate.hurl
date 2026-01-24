@@ -1,9 +1,10 @@
 # Test Preset Model Generation
-# Run with: hurl --test test_generate.hurl
+# Run with: hurl --variables-file tests/hurl/vars.env --test tests/hurl/test_generate.hurl
 # Note: Requires the server to be running on 127.0.0.1:8080
 
 # 1. Basic generation with preset model and english language
-POST http://127.0.0.1:8080/generate
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
 Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
@@ -21,7 +22,8 @@ jsonpath "$.sampling_rate" == 24000
 
 
 # 2. Generation with multiple text inputs (should return multiple wavs)
-POST http://127.0.0.1:8080/generate
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
 Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
@@ -38,7 +40,8 @@ jsonpath "$.sampling_rate" == 24000
 
 
 # 3. Generation with instruct parameter
-POST http://127.0.0.1:8080/generate
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
 Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
@@ -55,7 +58,8 @@ jsonpath "$.sampling_rate" == 24000
 
 
 # 4. Generation with all optional parameters
-POST http://127.0.0.1:8080/generate
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
 Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
@@ -77,7 +81,8 @@ jsonpath "$.sampling_rate" == 24000
 
 
 # 5. Test different speakers - Ryan
-POST http://127.0.0.1:8080/generate
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
 Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
@@ -92,7 +97,8 @@ jsonpath "$.wavs[0]" exists
 
 
 # 6. Test different speakers - Aiden
-POST http://127.0.0.1:8080/generate
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
 Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
@@ -107,7 +113,8 @@ jsonpath "$.wavs[0]" exists
 
 
 # 7. Test different speakers - Uncle_Fu
-POST http://127.0.0.1:8080/generate
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
 Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
@@ -122,7 +129,8 @@ jsonpath "$.wavs[0]" exists
 
 
 # 8. Test Chinese language (zh)
-POST http://127.0.0.1:8080/generate
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
 Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
@@ -138,7 +146,8 @@ jsonpath "$.sampling_rate" == 24000
 
 
 # 9. Test Japanese language (ja)
-POST http://127.0.0.1:8080/generate
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
 Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
@@ -154,7 +163,8 @@ jsonpath "$.sampling_rate" == 24000
 
 
 # 10. Test Korean language (ko)
-POST http://127.0.0.1:8080/generate
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
 Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
@@ -170,7 +180,8 @@ jsonpath "$.sampling_rate" == 24000
 
 
 # 11. Test German language (de)
-POST http://127.0.0.1:8080/generate
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
 Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
@@ -186,7 +197,8 @@ jsonpath "$.sampling_rate" == 24000
 
 
 # 12. Test French language (fr)
-POST http://127.0.0.1:8080/generate
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
 Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
@@ -202,7 +214,8 @@ jsonpath "$.sampling_rate" == 24000
 
 
 # 13. Test Russian language (ru)
-POST http://127.0.0.1:8080/generate
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
 Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
@@ -218,7 +231,8 @@ jsonpath "$.sampling_rate" == 24000
 
 
 # 14. Test Portuguese language (pt)
-POST http://127.0.0.1:8080/generate
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
 Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
@@ -234,7 +248,8 @@ jsonpath "$.sampling_rate" == 24000
 
 
 # 15. Test Spanish language (es)
-POST http://127.0.0.1:8080/generate
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
 Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
@@ -250,7 +265,8 @@ jsonpath "$.sampling_rate" == 24000
 
 
 # 16. Test Italian language (it)
-POST http://127.0.0.1:8080/generate
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
 Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
@@ -266,7 +282,8 @@ jsonpath "$.sampling_rate" == 24000
 
 
 # 17. Test with unsupported language (should fail)
-POST http://127.0.0.1:8080/generate
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
 Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
@@ -281,7 +298,8 @@ jsonpath "$.detail" contains "invalid_language"
 
 
 # 18. Test with unsupported speaker (should fail)
-POST http://127.0.0.1:8080/generate
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
 Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
@@ -296,7 +314,8 @@ jsonpath "$.detail" contains "NonExistentSpeaker"
 
 
 # 19. Test with invalid model_id (should fail)
-POST http://127.0.0.1:8080/generate
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
 Content-Type: application/json
 {
   "model_id": "invalid-model",
@@ -308,7 +327,8 @@ HTTP 400
 
 
 # 20. Test with empty text (should fail due to NonEmptyStr validation)
-POST http://127.0.0.1:8080/generate
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
 Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
@@ -320,7 +340,8 @@ HTTP 422
 
 
 # 21. Test with remote provider (should fail - not implemented)
-POST http://127.0.0.1:8080/generate
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
 Content-Type: application/json
 {
   "model_id": "some-remote-model",
@@ -334,24 +355,9 @@ HTTP 400
 jsonpath "$.detail" == "Remote models not implemented yet."
 
 
-# 22. Test generation with custom model and UUID speaker
-# Note: This assumes a custom speaker exists; in a real test you'd create one first
-# This test demonstrates the generate endpoint works with custom model too
-POST http://127.0.0.1:8080/generate
-Content-Type: application/json
-{
-  "model_id": "qwen3-tts-custom",
-  "text": "Testing custom model with preset speaker name.",
-  "language": "english",
-  "speaker": "test_speaker"
-}
-HTTP 400
-[Asserts]
-jsonpath "$.detail" contains "Unsupported speaker"
-
-
 # 23. Verify base64 encoding of wavs
-POST http://127.0.0.1:8080/generate
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
 Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
@@ -367,7 +373,8 @@ jsonpath "$.sampling_rate" isInteger
 
 
 # 24. Test with mixed language content (model should handle based on language param)
-POST http://127.0.0.1:8080/generate
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
 Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
@@ -383,7 +390,8 @@ jsonpath "$.sampling_rate" == 24000
 
 
 # 25. Test long text generation
-POST http://127.0.0.1:8080/generate
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer {{token}}
 Content-Type: application/json
 {
   "model_id": "qwen3-tts-preset",
@@ -396,3 +404,28 @@ HTTP 200
 jsonpath "$.status" == "ok"
 jsonpath "$.wavs[0]" exists
 jsonpath "$.sampling_rate" == 24000
+
+
+# 26. Test without authentication (should fail)
+POST {{base_url}}/api/v1/generate
+Content-Type: application/json
+{
+  "model_id": "qwen3-tts-preset",
+  "text": "This should fail without auth.",
+  "language": "english",
+  "speaker": "Vivian"
+}
+HTTP 401
+
+
+# 27. Test with invalid token (should fail)
+POST {{base_url}}/api/v1/generate
+Authorization: Bearer invalid-token-here
+Content-Type: application/json
+{
+  "model_id": "qwen3-tts-preset",
+  "text": "This should fail with invalid token.",
+  "language": "english",
+  "speaker": "Vivian"
+}
+HTTP 401

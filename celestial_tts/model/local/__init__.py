@@ -2,12 +2,14 @@ from typing import Generic, List, Optional, Set, Tuple, TypeVar, Union
 
 import numpy as np
 from pydantic import BaseModel
+from qwen_tts.inference.qwen3_tts_model import AudioLike
 
 from celestial_tts.database import Database
 from celestial_tts.model.types import NonEmptyStr
 
 LanguageT = TypeVar("LanguageT")
 SpeakerT = TypeVar("SpeakerT")
+InstructT = TypeVar("InstructT")
 
 
 class LocalTTSModel(BaseModel, Generic[LanguageT, SpeakerT]):
@@ -21,11 +23,13 @@ class LocalTTSModel(BaseModel, Generic[LanguageT, SpeakerT]):
     async def create_speaker(
         self,
         name: str,
-        text: Union[NonEmptyStr, List[NonEmptyStr]],
-        language: LanguageT,
-        instruct: Union[NonEmptyStr, List[NonEmptyStr]],
+        ref_audio: AudioLike,
+        ref_text: str,
     ) -> SpeakerT:
-        """Create a new speaker for this model"""
+        """
+        Create a new speaker for this model by using the reference audio and text.
+        Most models that support custom speakers will use the reference audio and text to clone the speaker's voice.
+        """
         raise NotImplementedError()
 
     async def str_to_language(

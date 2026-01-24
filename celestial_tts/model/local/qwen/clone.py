@@ -1,10 +1,11 @@
 import asyncio
-from typing import Any, ClassVar, List, Literal, Optional, Set, Tuple, Union, get_args
+from typing import ClassVar, List, Literal, Optional, Set, Tuple, Union, get_args
 from uuid import UUID
 
 import numpy as np
 from fastapi import HTTPException
 from qwen_tts import Qwen3TTSModel
+from qwen_tts.inference.qwen3_tts_model import AudioLike
 
 from celestial_tts.database import Database
 from celestial_tts.database.controller.custom_speaker import (
@@ -32,12 +33,11 @@ Language = Literal[
 SUPPORTED_LANGUAGES: Set[Language] = set(get_args(Language))
 
 
-class QwenTTSCustom(LocalTTSModel[Language, QwenCustomSpeaker]):
-    """Qwen3 TTS using Custom voices"""
+class QwenTTSClone(LocalTTSModel[Language, QwenCustomSpeaker]):
+    """Qwen3 TTS using voice cloning"""
 
     model_config = {"arbitrary_types_allowed": True}
-    clone_model: Qwen3TTSModel
-    design_model: Qwen3TTSModel
+    model: Qwen3TTSModel
     loaded: bool = True
     lock: ClassVar[asyncio.Lock] = asyncio.Lock()
 
@@ -47,32 +47,21 @@ class QwenTTSCustom(LocalTTSModel[Language, QwenCustomSpeaker]):
     async def create_speaker(
         self,
         name: str,
-        text: Union[NonEmptyStr, List[NonEmptyStr]],
-        language: Language,
-        instruct: Union[NonEmptyStr, List[NonEmptyStr]],
+        ref_audio: AudioLike,
+        ref_text: str,
     ) -> QwenCustomSpeaker:
-        wavs, sr = self.design_model.generate_voice_design(
-            text=text,
-            language=language,
-            instruct=instruct,
-        )
-
-        voice_clone_prompt = self.clone_model.create_voice_clone_prompt(
-            ref_audio=(
-                wavs[0],
-                sr,
-            ),
-            ref_text=text,  # pyright: ignore[reportArgumentType]
+        voice_clone_prompt = self.model.create_voice_clone_prompt(
+            ref_audio=ref_audio,
+            ref_text=ref_text,
         )[0]
 
         return qwen_speaker_from_prompt(name, voice_clone_prompt)
 
     def __init__(
         self,
-        design_model: Qwen3TTSModel,
-        clone_model: Qwen3TTSModel,
+        model: Qwen3TTSModel,
     ):
-        super().__init__(clone_model=clone_model, design_model=design_model)
+        super().__init__(model=model)
 
     async def str_to_language(
         self, database: Database, language_str: str
@@ -117,10 +106,8 @@ class QwenTTSCustom(LocalTTSModel[Language, QwenCustomSpeaker]):
             raise ValueError("Model is not loaded")
 
         def run():
-            return self.clone_model.generate_voice_clone(
-                voice_clone_prompt=[
-                    speaker.to_voice_clone_prompt(self.clone_model.device)
-                ],
+            return self.model.generate_voice_clone(
+                voice_clone_prompt=[speaker.to_voice_clone_prompt(self.model.device)],
                 text=text,
                 language=language,
                 speaker=speaker,
@@ -146,7 +133,7 @@ class QwenTTSCustom(LocalTTSModel[Language, QwenCustomSpeaker]):
 
         # Check if model exists before deleting
         if hasattr(self, "model"):
-            del self.clone_model
+            del self.model
 
         # Clear CUDA cache only if CUDA is available
         if torch.cuda.is_available():
