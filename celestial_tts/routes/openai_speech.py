@@ -71,7 +71,7 @@ class SpeechRequest(BaseModel):
     )
     instructions: Optional[str] = Field(
         default=None,
-        description="Additional instructions for voice control (only supported by voice-design model)",
+        description="Additional instructions for voice control. Note: instructions may not be supported by all models",
     )
 
 

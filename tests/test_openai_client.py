@@ -8,9 +8,10 @@ Environment variables:
 
 import os
 from pathlib import Path
-from typing import List, Literal, Tuple
+from typing import List, Literal, Optional, Tuple
 
 import pytest
+import soundfile as sf
 from openai import OpenAI
 
 # Configuration
@@ -125,17 +126,22 @@ class TestAudioFormats:
     """Test different audio output formats."""
 
     @pytest.mark.parametrize(
-        "format,extension",
+        "format,extension,expected_format",
         [
-            ("mp3", "mp3"),
-            ("wav", "wav"),
-            ("opus", "opus"),
-            ("flac", "flac"),
-            ("pcm", "pcm"),
+            ("mp3", "mp3", "MP3"),
+            ("wav", "wav", "WAV"),
+            ("opus", "opus", "OGG"),  # Opus uses OGG container
+            ("flac", "flac", "FLAC"),
+            ("pcm", "pcm", None),  # PCM is raw data, no header to validate
         ],
     )
     def test_audio_formats(
-        self, client: OpenAI, format: Format, extension: str, tmp_path: Path
+        self,
+        client: OpenAI,
+        format: Format,
+        extension: str,
+        expected_format: Optional[str],
+        tmp_path: Path,
     ) -> None:
         """Test different audio output formats."""
         output_file = tmp_path / f"test.{extension}"
@@ -150,6 +156,13 @@ class TestAudioFormats:
 
         assert output_file.exists()
         assert output_file.stat().st_size > 0
+
+        # Validate actual audio format (PCM has no header to validate)
+        if expected_format is not None:
+            info = sf.info(output_file)
+            assert info.format == expected_format, (
+                f"Expected {expected_format} format, got {info.format}"
+            )
 
 
 class TestSpeedParameter:

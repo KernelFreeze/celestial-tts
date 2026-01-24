@@ -13,7 +13,6 @@ from celestial_tts.database.controller.custom_speaker import (
     select_qwen_custom_speaker_by_id,
     select_qwen_custom_speakers,
 )
-from celestial_tts.database.model.custom_speaker import QwenCustomSpeaker
 from celestial_tts.database.utils import qwen_speaker_from_prompt
 from celestial_tts.model.local import LocalTTSModel, NonEmptyStr
 
