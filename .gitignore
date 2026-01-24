@@ -17,3 +17,6 @@ config.toml
 
 # Database
 *.db
+
+# Environment variables
+.env

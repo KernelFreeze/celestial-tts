@@ -43,16 +43,16 @@ async def _create_token(name: str, expires_in_days: Optional[int]) -> None:
 
     await database.close()
 
-    typer.echo(f"Token created successfully!\n")
+    typer.echo("Token created successfully!\n")
     typer.echo(f"  ID:         {token.id}")
     typer.echo(f"  Name:       {token.name}")
     typer.echo(f"  Created:    {token.created_at.isoformat()}")
     if expires_at:
         typer.echo(f"  Expires:    {expires_at.isoformat()}")
     else:
-        typer.echo(f"  Expires:    Never")
+        typer.echo("  Expires:    Never")
     typer.echo(f"\n  Token:      {token_string}")
-    typer.echo(f"\nStore this token securely - it cannot be retrieved later.")
+    typer.echo("\nStore this token securely - it cannot be retrieved later.")
 
 
 if __name__ == "__main__":
