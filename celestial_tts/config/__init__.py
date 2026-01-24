@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import tomli_w
-from fastapi import Request
 from pydantic import Field
 from pydantic_settings import (
     BaseSettings,
@@ -10,38 +9,9 @@ from pydantic_settings import (
     TomlConfigSettingsSource,
 )
 
-
-class DatabaseConfig(BaseSettings):
-    """Configuration for database."""
-
-    model_config = SettingsConfigDict(env_prefix="CELESTIAL_DATABASE_")
-
-    url: str = Field(
-        default="sqlite+aiosqlite:///database.db",
-        description="Database URL. Supports sqlite and postgres (e.g., postgresql+asyncpg://user:pass@localhost/db)",
-    )
-
-
-class IntegratedModelsConfig(BaseSettings):
-    """Configuration for integrated models."""
-
-    model_config = SettingsConfigDict(env_prefix="CELESTIAL_INTEGRATED_MODELS_")
-
-    enabled: bool = Field(
-        default=True,
-        description="Whether to enable integrated models",
-    )
-
-    max_loaded_models: int = Field(
-        default=2,
-        ge=1,
-        description="Maximum number of integrated models to keep loaded in memory simultaneously",
-    )
-
-    device_map: str = Field(
-        default="cpu",
-        description="Device map for integrated models",
-    )
+from celestial_tts.config.database import DatabaseConfig
+from celestial_tts.config.logging import LoggingConfig
+from celestial_tts.config.models import IntegratedModelsConfig
 
 
 class Config(BaseSettings):
@@ -64,6 +34,11 @@ class Config(BaseSettings):
     integrated_models: IntegratedModelsConfig = Field(
         default_factory=IntegratedModelsConfig,
         description="Configuration for integrated models",
+    )
+
+    logging: LoggingConfig = Field(
+        default_factory=LoggingConfig,
+        description="Configuration for logging",
     )
 
     @classmethod
@@ -112,6 +87,7 @@ def create_default_config(path: Path | None = None) -> Path:
     default_config = Config.model_construct(
         database=DatabaseConfig.model_construct(),
         integrated_models=IntegratedModelsConfig.model_construct(),
+        logging=LoggingConfig.model_construct(),
     )
     path.write_text(tomli_w.dumps(default_config.model_dump()), encoding="utf-8")
     return path
