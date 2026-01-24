@@ -6,7 +6,7 @@ A multi-lingual, multi-provider Text-to-Speech (TTS) REST API microservice built
 
 - **Multi-lingual support** - 11 languages including auto-detection
 - **Multiple voice presets** - 9 built-in voices with distinct characteristics
-- **Custom voice cloning** - Create personalized voices via voice design
+- **Custom voice cloning** - Clone voices from audio samples
 - **Async-first architecture** - Built on FastAPI with full async support
 - **LRU model caching** - Efficient memory management for multiple models
 - **Flexible configuration** - Environment variables, TOML files, or code
@@ -200,7 +200,7 @@ Content-Type: application/json
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `model_id` | string | Yes | `qwen3-tts-preset` or `qwen3-tts-custom` |
+| `model_id` | string | Yes | `qwen3-tts-preset`, `qwen3-tts-voice-clone`, or `qwen3-tts-voice-design` |
 | `text` | string/array | Yes | Text to synthesize |
 | `language` | string | Yes | Language code (see supported languages) |
 | `speaker` | string | Yes | Preset name or custom speaker UUID |
@@ -240,20 +240,21 @@ GET /speakers?model_id=qwen3-tts-preset
 }
 ```
 
-### Create Custom Speaker
+### Create Custom Speaker (Voice Cloning)
 
 ```http
 POST /speakers
 Content-Type: application/json
 
 {
-  "model_id": "qwen3-tts-custom",
+  "model_id": "qwen3-tts-voice-clone",
   "name": "My Voice",
-  "text": "Reference text for voice design",
-  "language": "english",
-  "instruct": "A young female with an energetic tone"
+  "text": "The transcript of what is said in the audio",
+  "audio": "https://example.com/reference.wav"
 }
 ```
+
+The `audio` field accepts either an HTTP(S) URL or base64-encoded audio data. Local file paths are not supported for security reasons.
 
 **Response:**
 
@@ -271,7 +272,7 @@ Content-Type: application/json
 ### Delete Custom Speaker
 
 ```http
-DELETE /speakers/{speaker_id}?model_id=qwen3-tts-custom
+DELETE /speakers/{speaker_id}?model_id=qwen3-tts-voice-clone
 ```
 
 **Response:**
@@ -291,9 +292,13 @@ For now, only the following local models are supported. I plan to add support fo
 
 Uses Qwen3-TTS with fixed preset voices. Best for quick, consistent results.
 
-### qwen3-tts-custom
+### qwen3-tts-voice-clone
 
-Supports custom voice cloning and voice design. Create unique voices by providing reference text and voice instructions.
+Supports voice cloning from audio samples. Create unique voices by providing a reference audio file and its transcript.
+
+### qwen3-tts-voice-design
+
+Supports custom voice design. Create unique voices by providing reference text and voice instructions describing the desired voice characteristics.
 
 ## Usage Examples
 
