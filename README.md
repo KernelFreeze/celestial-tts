@@ -299,8 +299,23 @@ Content-Type: application/json
 ### Delete Custom Speaker
 
 ```http
-DELETE /speakers/{speaker_id}?model_id=qwen3-tts-voice-clone
+DELETE /speakers
+Content-Type: application/json
+
+{
+  "model_id": "qwen3-tts-voice-clone",
+  "speaker_id": "uuid7-string",
+  "provider": "local"
+}
 ```
+
+**Parameters:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `model_id` | string | Yes | Model ID that supports custom speakers |
+| `speaker_id` | string | Yes | UUID of the custom speaker to delete |
+| `provider` | string | No | `local` (default) |
 
 **Response:**
 
