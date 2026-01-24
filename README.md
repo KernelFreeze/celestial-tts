@@ -269,6 +269,33 @@ The `audio` field accepts either an HTTP(S) URL or base64-encoded audio data. Lo
 }
 ```
 
+### Generate with Voice Design
+
+Voice design generates speech with a dynamically created voice based on a text description. Unlike voice cloning, no audio sample is needed—the voice is synthesized from the `instruct` parameter.
+
+```http
+POST /generate
+Content-Type: application/json
+
+{
+  "model_id": "qwen3-tts-voice-design",
+  "text": "Hello, this is my designed voice!",
+  "language": "english",
+  "speaker": "generated",
+  "instruct": "A young female with an energetic and cheerful tone"
+}
+```
+
+**Response:**
+
+```json
+{
+  "status": "ok",
+  "wavs": ["base64-encoded-wav-data"],
+  "sampling_rate": 24000
+}
+```
+
 ### Delete Custom Speaker
 
 ```http
