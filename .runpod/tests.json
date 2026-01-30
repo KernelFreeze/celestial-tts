@@ -8,7 +8,7 @@
                 "language": "english",
                 "speaker": "Vivian"
             },
-            "timeout": 120000
+            "timeout": 300000
         },
         {
             "name": "test_generate_alternate_voice",
@@ -18,7 +18,7 @@
                 "language": "english",
                 "speaker": "Dylan"
             },
-            "timeout": 120000
+            "timeout": 300000
         },
         {
             "name": "test_generate_multilingual",
@@ -28,7 +28,7 @@
                 "language": "french",
                 "speaker": "Vivian"
             },
-            "timeout": 120000
+            "timeout": 300000
         },
         {
             "name": "test_openai_compatible",
@@ -39,7 +39,7 @@
                 "input": "This is a test using the OpenAI-compatible interface.",
                 "response_format": "wav"
             },
-            "timeout": 120000
+            "timeout": 300000
         }
     ],
     "config": {

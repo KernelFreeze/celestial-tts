@@ -1,14 +1,10 @@
-"""RunPod serverless handler for Celestial TTS.
-
-Bypasses FastAPI and calls the TTS business logic directly.
-The container auto-detects the RunPod environment via RUNPOD_POD_ID
-and switches to this handler instead of the HTTP server.
-"""
+"""RunPod serverless handler for Celestial TTS."""
 
 import asyncio
 import base64
 import io
 import logging
+from concurrent.futures import ThreadPoolExecutor
 
 import runpod
 import soundfile as sf
@@ -26,18 +22,71 @@ from celestial_tts.routes.openai_speech import (
     _map_voice,
 )
 
-# Module-level initialization (replaces FastAPI lifespan)
+# Module-level configuration
 config = Config()
 setup_logging(config.logging)
 
 logger = logging.getLogger(__name__)
 
-database = Database(config.database.url)
-asyncio.get_event_loop().run_until_complete(database.init_db())
+# Thread pool for blocking model loading operations
+_model_loading_executor = ThreadPoolExecutor(max_workers=1)
 
-models = ModelState(config=config)
+# Lazy initialization globals
+_database = None
+_models = None
+_init_lock = asyncio.Lock()
 
-logger.info("RunPod handler initialized")
+
+async def _get_database():
+    """Lazy async initialization of database."""
+    global _database
+    if _database is None:
+        async with _init_lock:
+            if _database is None:
+                logger.info("Initializing database...")
+                _database = Database(config.database.url)
+                await _database.init_db()
+                logger.info("Database initialized")
+    return _database
+
+
+def _get_models():
+    """Lazy initialization of models (synchronous)."""
+    global _models
+    if _models is None:
+        logger.info("Initializing model state...")
+        _models = ModelState(config=config)
+        logger.info(
+            f"Model state initialized (local_enabled={_models.local_state is not None})"
+        )
+    return _models
+
+
+def _load_model_sync(model_type, device_map):
+    """Synchronous model loading to run in thread pool."""
+    logger.info(f"Loading model {model_type.value} on {device_map}...")
+    model = LocalTTSFactory.create(model_type, device_map)
+    logger.info(f"Model {model_type.value} loaded")
+    return model
+
+
+async def _get_or_load_model(model_state, model_type):
+    """Get model from cache or load it in thread pool."""
+    # Check if model is already cached
+    model = model_state.local_state.model_cache.get(model_type)
+    if model is not None:
+        return model
+
+    # Load model in thread pool to avoid blocking the event loop
+    loop = asyncio.get_event_loop()
+    model = await loop.run_in_executor(
+        _model_loading_executor,
+        _load_model_sync,
+        model_type,
+        config.integrated_models.device_map,
+    )
+    model_state.local_state.model_cache.put(model_type, model)
+    return model
 
 
 async def _handle_generate(input_data: dict) -> dict:
@@ -56,28 +105,32 @@ async def _handle_generate(input_data: dict) -> dict:
     except HTTPException as e:
         return {"error": e.detail}
 
-    if models.local_state is None:
+    # Initialize services
+    db = await _get_database()
+    model_state = _get_models()
+
+    if model_state.local_state is None:
         return {"error": "Local model state not initialized"}
 
-    model = models.local_state.model_cache.get_or_put(
-        model_type,
-        lambda: LocalTTSFactory.create(model_type, config.integrated_models.device_map),
-    )
-    if model is None:
-        return {"error": "Model not found"}
+    # Get or load model
+    try:
+        model = await _get_or_load_model(model_state, model_type)
+    except Exception as e:
+        logger.exception(f"Failed to load model: {e}")
+        return {"error": f"Failed to load model: {str(e)}"}
 
     # Validate language
-    language_type = await model.str_to_language(database, language)
+    language_type = await model.str_to_language(db, language)
     if language_type is None:
-        supported = await model.get_supported_languages(database)
+        supported = await model.get_supported_languages(db)
         return {
             "error": f"Unsupported language '{language}'. Supported: {sorted(supported)}"
         }
 
     # Validate speaker
-    speaker_type = await model.str_to_speaker(database, speaker)
+    speaker_type = await model.str_to_speaker(db, speaker)
     if speaker_type is None:
-        supported = await model.get_supported_speakers(database)
+        supported = await model.get_supported_speakers(db)
         if supported is not None:
             speaker_names = sorted([name for _, name in supported])
             return {
@@ -87,7 +140,7 @@ async def _handle_generate(input_data: dict) -> dict:
 
     # Generate audio
     wavs, sr = await model.generate_voice(
-        database,
+        db,
         text,
         language_type,
         speaker_type,
@@ -129,39 +182,43 @@ async def _handle_openai(input_data: dict) -> dict:
             "error": f"Unsupported response_format '{response_format}'. Supported: {list(AUDIO_CONTENT_TYPES.keys())}"
         }
 
-    if models.local_state is None:
+    # Initialize services
+    db = await _get_database()
+    model_state = _get_models()
+
+    if model_state.local_state is None:
         return {"error": "Local model state not initialized"}
 
     # Map model and voice
     model_type = _map_model_id(model_name)
     speaker = _map_voice(voice)
 
-    model = models.local_state.model_cache.get_or_put(
-        model_type,
-        lambda: LocalTTSFactory.create(model_type, config.integrated_models.device_map),
-    )
-    if model is None:
-        return {"error": "Model not found"}
+    # Get or load model
+    try:
+        model = await _get_or_load_model(model_state, model_type)
+    except Exception as e:
+        logger.exception(f"Failed to load model: {e}")
+        return {"error": f"Failed to load model: {str(e)}"}
 
     # Validate speaker
-    speaker_type = await model.str_to_speaker(database, speaker)
+    speaker_type = await model.str_to_speaker(db, speaker)
     if speaker_type is None:
-        supported = await model.get_supported_speakers(database)
+        supported = await model.get_supported_speakers(db)
         if supported is not None:
             speaker_names = sorted([name for _, name in supported])
             return {"error": f"Unsupported voice '{voice}'. Supported: {speaker_names}"}
         return {"error": f"Unsupported voice '{voice}'"}
 
     # Auto-detect language
-    language_type = await model.str_to_language(database, "auto")
+    language_type = await model.str_to_language(db, "auto")
     if language_type is None:
-        language_type = await model.str_to_language(database, "english")
+        language_type = await model.str_to_language(db, "english")
         if language_type is None:
             return {"error": "Could not determine language for synthesis"}
 
     # Generate audio
     wavs, sr = await model.generate_voice(
-        database, text, language_type, speaker_type, instruct
+        db, text, language_type, speaker_type, instruct
     )
 
     if not wavs:
@@ -200,14 +257,11 @@ async def _handle_openai(input_data: dict) -> dict:
 async def _handle_health() -> dict:
     """Handle health check requests."""
     try:
-        # Check model state initialization
-        model_status = "ok" if models.local_state is not None else "initializing"
-
-        # Overall health - database was initialized at module load
-        status = "healthy" if model_status == "ok" else "degraded"
+        model_state = _get_models()
+        model_status = "ok" if model_state.local_state is not None else "initializing"
 
         return {
-            "status": status,
+            "status": "healthy" if model_status == "ok" else "degraded",
             "checks": {"models": model_status},
         }
     except Exception as e:
@@ -220,7 +274,7 @@ async def handler(job: dict) -> dict:
     try:
         input_data = job.get("input", {})
 
-        # Handle health check requests
+        # Handle health check requests immediately
         if input_data.get("health"):
             return await _handle_health()
 
@@ -233,4 +287,5 @@ async def handler(job: dict) -> dict:
         return {"error": str(e)}
 
 
+logger.info("RunPod handler module loaded, waiting for first request...")
 runpod.serverless.start({"handler": handler})

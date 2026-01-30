@@ -6,6 +6,7 @@ WORKDIR /app
 # Install system dependencies for audio processing
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libsox-dev \
+    sox \
     && rm -rf /var/lib/apt/lists/*
 
 # Enable bytecode compilation and link mode for faster startup
@@ -23,6 +24,13 @@ COPY . .
 # Install the project itself
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --extra runpod
+
+# Pre-download Qwen3-TTS models to eliminate cold start
+# This downloads the model weights during build time
+ENV HF_HOME=/app/.cache/huggingface
+ENV TRANSFORMERS_CACHE=/app/.cache/huggingface
+RUN --mount=type=cache,target=/root/.cache/huggingface \
+    uv run python scripts/download_models.py
 
 EXPOSE 8080
 
