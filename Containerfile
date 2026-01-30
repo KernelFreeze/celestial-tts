@@ -24,14 +24,14 @@ ENV UV_COMPILE_BYTECODE=1 \
 # Install dependencies first (cached layer)
 COPY pyproject.toml uv.lock README.md ./
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-install-project --no-dev --extra runpod --extra cuda
+    uv sync --frozen --no-install-project --no-dev --extra runpod --extra cuda --preview-features extra-build-dependencies
 
 # Copy source code
 COPY . .
 
 # Install the project itself
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev --extra runpod
+    uv sync --frozen --no-dev --extra runpod --extra cuda --preview-features extra-build-dependencies
 
 # Pre-download Qwen3-TTS models to eliminate cold start
 # This downloads the model weights during build time
