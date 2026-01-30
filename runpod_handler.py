@@ -4,7 +4,15 @@ import asyncio
 import base64
 import io
 import logging
+import os
 from concurrent.futures import ThreadPoolExecutor
+
+# Configure HuggingFace to use RunPod's cached model volume.
+# Models are pre-cached on the network volume, so from_pretrained()
+# loads them directly without downloading.
+RUNPOD_MODEL_CACHE = "/runpod-volume/huggingface-cache"
+if os.path.isdir(RUNPOD_MODEL_CACHE):
+    os.environ["HF_HOME"] = RUNPOD_MODEL_CACHE
 
 import runpod
 import soundfile as sf

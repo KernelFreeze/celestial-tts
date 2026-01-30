@@ -36,13 +36,6 @@ COPY . .
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --extra runpod --extra cuda --preview-features extra-build-dependencies
 
-# Pre-download Qwen3-TTS models to eliminate cold start
-# This downloads the model weights during build time
-ENV HF_HOME=/app/.cache/huggingface
-ENV TRANSFORMERS_CACHE=/app/.cache/huggingface
-RUN --mount=type=cache,target=/root/.cache/huggingface \
-    uv run python scripts/download_models.py
-
 EXPOSE 8080
 
 RUN chmod +x /app/scripts/healthcheck.sh
