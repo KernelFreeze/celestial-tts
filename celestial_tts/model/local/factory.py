@@ -10,6 +10,16 @@ from celestial_tts.model.local.qwen.design import QwenTTSDesign
 from celestial_tts.model.local.qwen.preset import QwenTTSPreset
 
 
+def _is_flash_attn_available() -> bool:
+    """Check if flash-attn is available for use."""
+    try:
+        import flash_attn  # pyright: ignore[reportMissingImports, reportUnusedImport]  # noqa: F401
+
+        return True
+    except ImportError:
+        return False
+
+
 class LocalTTSType(Enum):
     QWEN_PRESET_1_7B = "qwen3-tts-1.7b-preset"
     QWEN_PRESET_0_6B = "qwen3-tts-0.6b-preset"
@@ -61,13 +71,18 @@ class LocalTTSFactory:
         if hf_name is None:
             raise ValueError(f"Unknown Qwen TTS model type: {model_type}")
 
+        # Determine attention implementation: use flash_attention_2 only if
+        # CUDA is available AND flash-attn package is installed
+        if torch.cuda.is_available() and _is_flash_attn_available():
+            attn_impl = "flash_attention_2"
+        else:
+            attn_impl = "sdpa"
+
         model = Qwen3TTSModel.from_pretrained(
             hf_name,
             device_map=device_map,
             dtype=torch.bfloat16,
-            attn_implementation="flash_attention_2"
-            if torch.cuda.is_available()
-            else "sdpa",
+            attn_implementation=attn_impl,
         )
 
         if model_type in _PRESET_TYPES:

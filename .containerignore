@@ -81,3 +81,6 @@ Dockerfile
 
 # Python version management
 .python-version
+
+# Assets (logos, not needed at runtime)
+assets/

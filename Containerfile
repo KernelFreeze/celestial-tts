@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM nvidia/cuda:12.8.1-runtime-ubuntu24.04
+FROM nvidia/cuda:12.8.1-runtime-ubuntu24.04 AS builder
 
 # Get uv from its official image
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
@@ -36,6 +36,25 @@ COPY . .
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --extra runpod --extra cuda --preview-features extra-build-dependencies
 
+FROM nvidia/cuda:12.8.1-runtime-ubuntu24.04
+
+WORKDIR /app
+
+# Install only runtime dependencies (no -dev packages, no uv)
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --no-install-recommends \
+    python3.12 \
+    sox \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy the pre-built venv from the builder stage
+COPY --from=builder /app/.venv /app/.venv
+
+# Copy source code (needed for runpod_handler.py and entry point modules)
+COPY . .
+
+# Use the venv directly via PATH instead of uv run
+ENV PATH="/app/.venv/bin:$PATH"
+
 EXPOSE 8080
 
 RUN chmod +x /app/scripts/healthcheck.sh
@@ -43,7 +62,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD /app/scripts/healthcheck.sh
 
 CMD if [ -n "$RUNPOD_POD_ID" ]; then \
-    uv run python runpod_handler.py; \
+    python runpod_handler.py; \
     else \
-    uv run celestial-tts --host 0.0.0.0; \
+    celestial-tts --host 0.0.0.0; \
     fi
