@@ -5,6 +5,10 @@ from fastapi import APIRouter, Depends, FastAPI
 
 from celestial_tts.config import Config
 from celestial_tts.database import Database
+from celestial_tts.database.controller.auth_token import (
+    create_auth_token,
+    select_all_auth_tokens,
+)
 from celestial_tts.injectors import get_authenticated_token
 from celestial_tts.middleware import RequestLoggingMiddleware
 from celestial_tts.model import ModelState
@@ -26,6 +30,20 @@ async def lifespan(app: FastAPI):
         logger.error(f"Database URL: {app.state.config.database.url}")
         logger.error("Please ensure your database is running and accessible.")
         raise
+
+    if app.state.config.bootstrap.create_token:
+        existing_tokens = await select_all_auth_tokens(app.state.database)
+        if not existing_tokens:
+            token, secret = await create_auth_token(
+                app.state.database, "Bootstrap Token"
+            )
+            token_string = token.encode_token(secret)
+            logger.info(f"Bootstrap token created: {token_string}")
+        else:
+            logger.info(
+                "Bootstrap token creation skipped: tokens already exist"
+            )
+
     yield
     # Shutdown
     logger.info("Shutting down application")

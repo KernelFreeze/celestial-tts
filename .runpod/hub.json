@@ -1,0 +1,86 @@
+{
+  "title": "Celestial TTS",
+  "description": "Multi-lingual, multi-provider text-to-speech API with support for preset voices and custom voice cloning. OpenAI-compatible drop-in replacement powered by Qwen3-TTS models.",
+  "type": "serverless",
+  "category": "audio",
+  "config": {
+    "runsOn": "GPU",
+    "containerDiskInGb": 20,
+    "presets": [
+      {
+        "name": "Standard",
+        "defaults": {
+          "CELESTIAL_INTEGRATED_MODELS_MAX_LOADED_MODELS": 1,
+          "CELESTIAL_BOOTSTRAP_CREATE_TOKEN": true,
+          "CELESTIAL_LOGGING_LEVEL": "INFO"
+        }
+      },
+      {
+        "name": "High Capacity",
+        "defaults": {
+          "CELESTIAL_INTEGRATED_MODELS_MAX_LOADED_MODELS": 2,
+          "CELESTIAL_BOOTSTRAP_CREATE_TOKEN": true,
+          "CELESTIAL_LOGGING_LEVEL": "INFO"
+        }
+      }
+    ],
+    "env": [
+      {
+        "key": "CELESTIAL_INTEGRATED_MODELS_ENABLED",
+        "value": "true"
+      },
+      {
+        "key": "CELESTIAL_INTEGRATED_MODELS_DEVICE_MAP",
+        "value": "cuda:0"
+      },
+      {
+        "key": "CELESTIAL_BOOTSTRAP_CREATE_TOKEN",
+        "input": {
+          "type": "boolean",
+          "name": "Create bootstrap token",
+          "description": "Automatically create an auth token on first startup. The token will appear in the container logs.",
+          "default": true,
+          "trueValue": "true",
+          "falseValue": "false"
+        }
+      },
+      {
+        "key": "CELESTIAL_INTEGRATED_MODELS_MAX_LOADED_MODELS",
+        "input": {
+          "name": "Max loaded models",
+          "type": "number",
+          "description": "Maximum number of TTS models to keep loaded in VRAM simultaneously. Each model uses ~3.5GB VRAM.",
+          "min": 1,
+          "max": 4,
+          "default": 2
+        }
+      },
+      {
+        "key": "CELESTIAL_LOGGING_LEVEL",
+        "input": {
+          "name": "Log level",
+          "type": "string",
+          "description": "Application logging level.",
+          "options": [
+            {"label": "Debug", "value": "DEBUG"},
+            {"label": "Info", "value": "INFO"},
+            {"label": "Warning", "value": "WARNING"},
+            {"label": "Error", "value": "ERROR"}
+          ],
+          "default": "INFO",
+          "advanced": true
+        }
+      },
+      {
+        "key": "CELESTIAL_DATABASE_URL",
+        "input": {
+          "name": "Database URL",
+          "type": "string",
+          "description": "Database connection string. Use sqlite+aiosqlite:///database.db for local storage or postgresql+asyncpg://user:pass@host/db for PostgreSQL.",
+          "default": "sqlite+aiosqlite:///database.db",
+          "advanced": true
+        }
+      }
+    ]
+  }
+}

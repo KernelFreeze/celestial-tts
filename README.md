@@ -1,5 +1,9 @@
 # Celestial TTS
 
+[![Runpod](https://api.runpod.io/badge/KernelFreeze/celestial-tts)](https://console.runpod.io/hub/KernelFreeze/celestial-tts)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/KernelFreeze/celestial-tts/publish-container.yml)
+![GitHub Release](https://img.shields.io/github/v/release/KernelFreeze/celestial-tts)
+
 A multi-lingual, multi-provider Text-to-Speech (TTS) REST API microservice built with FastAPI. Generate high-quality speech synthesis through local models with support for preset voices and custom voice cloning.
 
 ## Features
@@ -145,7 +149,40 @@ Most API routes require a valid auth token. Tokens use the format `sk-ct-v1-<bas
 
 ### Creating Your First Token
 
-Before using protected endpoints, create a bootstrap token using the CLI:
+You have two options for creating an initial auth token:
+
+#### Option 1: Automatic Bootstrap Token (Recommended for Containers)
+
+Set the `CELESTIAL_BOOTSTRAP_CREATE_TOKEN` environment variable to automatically create a token on first startup:
+
+```bash
+# With podman/docker
+podman run --gpus all -p 8080:8080 \
+  -e CELESTIAL_BOOTSTRAP_CREATE_TOKEN=true \
+  -v ~/.cache/huggingface:/root/.cache/huggingface \
+  ghcr.io/kernelfreeze/celestial-tts:latest
+
+# The token will be printed to stdout on first startup
+# Example output:
+# 2026-01-30 12:00:00 - celestial_tts - INFO - Bootstrap token created: sk-ct-v1-...
+```
+
+The bootstrap token is only created if no tokens exist in the database. On subsequent restarts with persistent storage, token creation is skipped.
+
+**With persistent storage:**
+
+```bash
+podman run --gpus all -p 8080:8080 \
+  -e CELESTIAL_BOOTSTRAP_CREATE_TOKEN=true \
+  -e CELESTIAL_DATABASE_URL="sqlite+aiosqlite:///data/database.db" \
+  -v ./data:/app/data \
+  -v ~/.cache/huggingface:/root/.cache/huggingface \
+  ghcr.io/kernelfreeze/celestial-tts:latest
+```
+
+#### Option 2: Manual Token Creation via CLI
+
+When running from source, use the CLI tool to create tokens:
 
 ```bash
 # Create a token that never expires
@@ -154,8 +191,11 @@ uv run celestial-tts-create-token --name "My API Token"
 # Create a token that expires in 30 days
 uv run celestial-tts-create-token --name "Temporary Token" --expires-in 30
 
+# Quiet mode (only output the token)
+uv run celestial-tts-create-token --name "Dev Token" --quiet
+
 # Short flags
-uv run celestial-tts-create-token -n "Dev Token" -e 7
+uv run celestial-tts-create-token -n "Dev Token" -e 7 -q
 ```
 
 The command outputs the token details:
@@ -195,6 +235,9 @@ The API documentation is available at:
 ### Environment Variables
 
 ```bash
+# Bootstrap
+CELESTIAL_BOOTSTRAP_CREATE_TOKEN=false  # Auto-create token on first startup
+
 # Database
 CELESTIAL_DATABASE_URL="sqlite+aiosqlite:///database.db"
 CELESTIAL_DATABASE_URL="postgresql+asyncpg://user:pass@host/db"  # Production
@@ -210,6 +253,9 @@ CELESTIAL_INTEGRATED_MODELS_DEVICE_MAP="cuda:0"  # Or "cpu"
 Create `config.toml` or `~/.config/celestial-tts/config.toml`:
 
 ```toml
+[bootstrap]
+create_token = false
+
 [database]
 url = "sqlite+aiosqlite:///database.db"
 

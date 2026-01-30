@@ -9,6 +9,7 @@ from pydantic_settings import (
     TomlConfigSettingsSource,
 )
 
+from celestial_tts.config.bootstrap import BootstrapConfig
 from celestial_tts.config.database import DatabaseConfig
 from celestial_tts.config.logging import LoggingConfig
 from celestial_tts.config.models import IntegratedModelsConfig
@@ -24,6 +25,11 @@ class Config(BaseSettings):
             "config.toml",
             Path.home() / ".config" / "celestial-tts" / "config.toml",
         ],
+    )
+
+    bootstrap: BootstrapConfig = Field(
+        default_factory=BootstrapConfig,
+        description="Configuration for bootstrap operations on first startup",
     )
 
     database: DatabaseConfig = Field(
@@ -85,6 +91,7 @@ def create_default_config(path: Path | None = None) -> Path:
 
     path.parent.mkdir(parents=True, exist_ok=True)
     default_config = Config.model_construct(
+        bootstrap=BootstrapConfig.model_construct(),
         database=DatabaseConfig.model_construct(),
         integrated_models=IntegratedModelsConfig.model_construct(),
         logging=LoggingConfig.model_construct(),
