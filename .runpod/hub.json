@@ -27,23 +27,12 @@
         ],
         "env": [
             {
-                "key": "CELESTIAL_INTEGRATED_MODELS_ENABLED",
+                "key": "CELESTIAL_INTEGRATED_MODELS__ENABLED",
                 "value": "true"
             },
             {
                 "key": "CELESTIAL_INTEGRATED_MODELS__DEVICE_MAP",
                 "value": "cuda:0"
-            },
-            {
-                "key": "CELESTIAL_BOOTSTRAP_CREATE_TOKEN",
-                "input": {
-                    "type": "boolean",
-                    "name": "Create bootstrap token",
-                    "description": "Automatically create an auth token on first startup. The token will appear in the container logs.",
-                    "default": true,
-                    "trueValue": "true",
-                    "falseValue": "false"
-                }
             },
             {
                 "key": "CELESTIAL_INTEGRATED_MODELS__MAX_LOADED_MODELS",

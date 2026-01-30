@@ -1,13 +1,21 @@
 # syntax=docker/dockerfile:1
-FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
+FROM nvidia/cuda:12.8.1-devel-ubuntu24.04
+
+# Get uv from its official image
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 
 WORKDIR /app
 
-# Install system dependencies for audio processing
+# Install Python 3.12 and system dependencies for audio processing
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3.12 \
+    python3.12-dev \
     libsox-dev \
     sox \
     && rm -rf /var/lib/apt/lists/*
+
+# Point uv at the system Python
+ENV UV_PYTHON=/usr/bin/python3.12
 
 # Enable bytecode compilation and link mode for faster startup
 ENV UV_COMPILE_BYTECODE=1 \
