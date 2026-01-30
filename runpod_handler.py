@@ -61,9 +61,7 @@ async def _handle_generate(input_data: dict) -> dict:
 
     model = models.local_state.model_cache.get_or_put(
         model_type,
-        lambda: LocalTTSFactory.create(
-            model_type, config.integrated_models.device_map
-        ),
+        lambda: LocalTTSFactory.create(model_type, config.integrated_models.device_map),
     )
     if model is None:
         return {"error": "Model not found"}
@@ -140,9 +138,7 @@ async def _handle_openai(input_data: dict) -> dict:
 
     model = models.local_state.model_cache.get_or_put(
         model_type,
-        lambda: LocalTTSFactory.create(
-            model_type, config.integrated_models.device_map
-        ),
+        lambda: LocalTTSFactory.create(model_type, config.integrated_models.device_map),
     )
     if model is None:
         return {"error": "Model not found"}
@@ -153,9 +149,7 @@ async def _handle_openai(input_data: dict) -> dict:
         supported = await model.get_supported_speakers(database)
         if supported is not None:
             speaker_names = sorted([name for _, name in supported])
-            return {
-                "error": f"Unsupported voice '{voice}'. Supported: {speaker_names}"
-            }
+            return {"error": f"Unsupported voice '{voice}'. Supported: {speaker_names}"}
         return {"error": f"Unsupported voice '{voice}'"}
 
     # Auto-detect language
@@ -203,10 +197,32 @@ async def _handle_openai(input_data: dict) -> dict:
     }
 
 
+async def _handle_health() -> dict:
+    """Handle health check requests."""
+    try:
+        # Check model state initialization
+        model_status = "ok" if models.local_state is not None else "initializing"
+
+        # Overall health - database was initialized at module load
+        status = "healthy" if model_status == "ok" else "degraded"
+
+        return {
+            "status": status,
+            "checks": {"models": model_status},
+        }
+    except Exception as e:
+        logger.exception("Health check failed")
+        return {"status": "unhealthy", "error": str(e)}
+
+
 async def handler(job: dict) -> dict:
     """RunPod serverless handler entry point."""
     try:
         input_data = job.get("input", {})
+
+        # Handle health check requests
+        if input_data.get("health"):
+            return await _handle_health()
 
         if input_data.get("openai"):
             return await _handle_openai(input_data)

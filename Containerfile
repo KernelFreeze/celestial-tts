@@ -26,12 +26,18 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 EXPOSE 8080
 
-# Health check using the API health endpoint
+# Health check - only meaningful in HTTP mode
+# Copy health check script
+COPY scripts/healthcheck.sh /usr/local/bin/healthcheck.sh
+RUN chmod +x /usr/local/bin/healthcheck.sh
+
+# Health check - only meaningful in HTTP mode
+# In serverless mode, RunPod handles health checking via the handler
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8080/api/health')" || exit 1
+    CMD /usr/local/bin/healthcheck.sh
 
 CMD if [ -n "$RUNPOD_POD_ID" ]; then \
-        uv run python runpod_handler.py; \
+    uv run python runpod_handler.py; \
     else \
-        uv run celestial-tts --host 0.0.0.0; \
+    uv run celestial-tts --host 0.0.0.0; \
     fi
