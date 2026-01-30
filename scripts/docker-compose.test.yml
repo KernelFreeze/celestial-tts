@@ -1,0 +1,67 @@
+# Docker Compose configuration for local RunPod testing
+# Usage: docker-compose -f scripts/docker-compose.test.yml up
+
+version: '3.8'
+
+services:
+  celestial-tts-runpod:
+    build:
+      context: ..
+      dockerfile: Containerfile
+    image: celestial-tts-runpod-test
+    container_name: celestial-runpod-local-test
+    runtime: nvidia  # Required for GPU access
+    environment:
+      # RunPod simulation - triggers handler mode
+      - RUNPOD_POD_ID=local-test-pod-123
+
+      # Core configuration
+      - CELESTIAL_INTEGRATED_MODELS__ENABLED=true
+      - CELESTIAL_INTEGRATED_MODELS__DEVICE_MAP=cuda:0
+      - CELESTIAL_INTEGRATED_MODELS__MAX_LOADED_MODELS=1
+      - CELESTIAL_BOOTSTRAP_CREATE_TOKEN=true
+      - CELESTIAL_LOGGING_LEVEL=DEBUG
+
+      # HuggingFace cache
+      - HF_HOME=/app/.cache/huggingface
+      - TRANSFORMERS_CACHE=/app/.cache/huggingface
+
+      # Optional: HF Token for private models
+      # - HF_TOKEN=your_token_here
+
+    volumes:
+      # Persist model cache between runs
+      - ../.cache/huggingface:/app/.cache/huggingface:Z
+
+      # Optional: Mount config for testing
+      # - ../config.toml:/app/config.toml:ro
+
+    # Override command to run handler directly
+    command: >
+      sh -c "
+        echo '=== Configuration Debug ===' &&
+        uv run python scripts/debug_config.py &&
+        echo '' &&
+        echo '=== Starting RunPod Handler ===' &&
+        uv run python runpod_handler.py
+      "
+
+    # GPU resources
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+    # Health check (though handler doesn't expose HTTP)
+    healthcheck:
+      test: ["CMD", "echo", "Handler running"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+    stdin_open: true
+    tty: true

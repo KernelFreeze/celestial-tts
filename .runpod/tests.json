@@ -51,11 +51,11 @@
                 "value": "true"
             },
             {
-                "key": "CELESTIAL_INTEGRATED_MODELS_DEVICE_MAP",
+                "key": "CELESTIAL_INTEGRATED_MODELS__DEVICE_MAP",
                 "value": "cuda:0"
             },
             {
-                "key": "CELESTIAL_INTEGRATED_MODELS_MAX_LOADED_MODELS",
+                "key": "CELESTIAL_INTEGRATED_MODELS__MAX_LOADED_MODELS",
                 "value": "1"
             }
         ],

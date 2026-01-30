@@ -14,7 +14,7 @@ ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy
 
 # Install dependencies first (cached layer)
-COPY pyproject.toml uv.lock ./
+COPY pyproject.toml uv.lock README.md ./
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-install-project --no-dev --extra runpod
 
@@ -34,15 +34,9 @@ RUN --mount=type=cache,target=/root/.cache/huggingface \
 
 EXPOSE 8080
 
-# Health check - only meaningful in HTTP mode
-# Copy health check script
-COPY scripts/healthcheck.sh /usr/local/bin/healthcheck.sh
-RUN chmod +x /usr/local/bin/healthcheck.sh
-
-# Health check - only meaningful in HTTP mode
-# In serverless mode, RunPod handles health checking via the handler
+RUN chmod +x /app/scripts/healthcheck.sh
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD /usr/local/bin/healthcheck.sh
+    CMD /app/scripts/healthcheck.sh
 
 CMD if [ -n "$RUNPOD_POD_ID" ]; then \
     uv run python runpod_handler.py; \

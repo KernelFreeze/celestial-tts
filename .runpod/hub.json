@@ -11,7 +11,7 @@
             {
                 "name": "Standard",
                 "defaults": {
-                    "CELESTIAL_INTEGRATED_MODELS_MAX_LOADED_MODELS": 1,
+                    "CELESTIAL_INTEGRATED_MODELS__MAX_LOADED_MODELS": 1,
                     "CELESTIAL_BOOTSTRAP_CREATE_TOKEN": true,
                     "CELESTIAL_LOGGING_LEVEL": "INFO"
                 }
@@ -19,7 +19,7 @@
             {
                 "name": "High Capacity",
                 "defaults": {
-                    "CELESTIAL_INTEGRATED_MODELS_MAX_LOADED_MODELS": 2,
+                    "CELESTIAL_INTEGRATED_MODELS__MAX_LOADED_MODELS": 2,
                     "CELESTIAL_BOOTSTRAP_CREATE_TOKEN": true,
                     "CELESTIAL_LOGGING_LEVEL": "INFO"
                 }
@@ -31,7 +31,7 @@
                 "value": "true"
             },
             {
-                "key": "CELESTIAL_INTEGRATED_MODELS_DEVICE_MAP",
+                "key": "CELESTIAL_INTEGRATED_MODELS__DEVICE_MAP",
                 "value": "cuda:0"
             },
             {
@@ -46,7 +46,7 @@
                 }
             },
             {
-                "key": "CELESTIAL_INTEGRATED_MODELS_MAX_LOADED_MODELS",
+                "key": "CELESTIAL_INTEGRATED_MODELS__MAX_LOADED_MODELS",
                 "input": {
                     "name": "Max loaded models",
                     "type": "number",

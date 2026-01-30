@@ -1,0 +1,83 @@
+# Git repository files
+.git
+.gitignore
+.gitattributes
+
+# Python cache and build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.venv
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Environment and local configuration
+.env
+.env.*
+*.local
+.claude/
+CLAUDE.md
+
+# Application data and user config
+config.toml
+*.db
+
+# Testing and coverage
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+tests/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+.pytest_cache/
+
+# CI/CD and deployment configs
+.github/
+.runpod/
+
+# Documentation
+LICENSE
+
+# Container build files (not needed inside container)
+Containerfile
+Dockerfile
+.containerignore
+.dockerignore
+
+# Python version management
+.python-version

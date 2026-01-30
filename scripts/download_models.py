@@ -32,7 +32,6 @@ def download_model(model_id: str, cache_dir: str) -> bool:
         snapshot_download(
             repo_id=model_id,
             cache_dir=cache_dir,
-            resume_download=True,
         )
 
         logger.info(f"Successfully downloaded: {model_id}")

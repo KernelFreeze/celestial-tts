@@ -28,6 +28,11 @@ setup_logging(config.logging)
 
 logger = logging.getLogger(__name__)
 
+# Log configuration for debugging
+logger.info(
+    f"Configuration loaded: device_map={config.integrated_models.device_map}, max_loaded_models={config.integrated_models.max_loaded_models}"
+)
+
 # Thread pool for blocking model loading operations
 _model_loading_executor = ThreadPoolExecutor(max_workers=1)
 
@@ -64,9 +69,9 @@ def _get_models():
 
 def _load_model_sync(model_type, device_map):
     """Synchronous model loading to run in thread pool."""
-    logger.info(f"Loading model {model_type.value} on {device_map}...")
+    logger.info(f"Loading model {model_type.value} on device: {device_map}")
     model = LocalTTSFactory.create(model_type, device_map)
-    logger.info(f"Model {model_type.value} loaded")
+    logger.info(f"Model {model_type.value} loaded on device: {device_map}")
     return model
 
 
