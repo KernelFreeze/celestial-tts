@@ -17,6 +17,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Point uv at the system Python
 ENV UV_PYTHON=/usr/bin/python3.12
 
+# Prevent a 3 hour compilation of flash-attn (better safe than sorry)
+ENV FLASH_ATTENTION_SKIP_CUDA_BUILD=TRUE
+
 # Enable bytecode compilation and link mode for faster startup
 ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy
