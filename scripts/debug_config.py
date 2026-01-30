@@ -57,7 +57,6 @@ def test_model_loading():
 
     try:
         from celestial_tts.config import Config
-        from celestial_tts.model.local.factory import LocalTTSFactory, LocalTTSType
 
         config = Config()
         device_map = config.integrated_models.device_map
