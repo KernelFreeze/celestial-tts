@@ -476,7 +476,7 @@ Content-Type: application/json
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `model_id` | string | Yes | `qwen3-tts-1.7b-preset`, `qwen3-tts-0.6b-preset`, `qwen3-tts-1.7b-voice-clone`, `qwen3-tts-0.6b-voice-clone`, `qwen3-tts-1.7b-voice-design`, or `qwen3-tts-0.6b-voice-design` |
+| `model_id` | string | Yes | `qwen3-tts-1.7b-preset`, `qwen3-tts-0.6b-preset`, `qwen3-tts-1.7b-voice-clone`, `qwen3-tts-0.6b-voice-clone`, `qwen3-tts-1.7b-voice-design` |
 | `text` | string/array | Yes | Text to synthesize |
 | `language` | string | Yes | Language code (see supported languages) |
 | `speaker` | string | Yes | Preset name or custom speaker UUID |
@@ -633,10 +633,6 @@ Uses Qwen3-TTS 0.6B with fixed preset voices. Lighter alternative to the 1.7B pr
 #### qwen3-tts-0.6b-voice-clone
 
 Supports voice cloning from audio samples using the 0.6B model. Lower resource usage compared to the 1.7B variant.
-
-#### qwen3-tts-0.6b-voice-design
-
-Supports custom voice design using the 0.6B model. Lower resource usage compared to the 1.7B variant.
 
 ## Usage Examples
 

@@ -16,7 +16,6 @@ class LocalTTSType(Enum):
     QWEN_VOICE_CLONE_1_7B = "qwen3-tts-1.7b-voice-clone"
     QWEN_VOICE_CLONE_0_6B = "qwen3-tts-0.6b-voice-clone"
     QWEN_VOICE_DESIGN_1_7B = "qwen3-tts-1.7b-voice-design"
-    QWEN_VOICE_DESIGN_0_6B = "qwen3-tts-0.6b-voice-design"
 
     @classmethod
     def from_str(cls, value: str) -> "LocalTTSType":
@@ -32,12 +31,13 @@ _HF_MODEL_NAMES: dict[LocalTTSType, str] = {
     LocalTTSType.QWEN_VOICE_CLONE_1_7B: "Qwen/Qwen3-TTS-12Hz-1.7B-Base",
     LocalTTSType.QWEN_VOICE_CLONE_0_6B: "Qwen/Qwen3-TTS-12Hz-0.6B-Base",
     LocalTTSType.QWEN_VOICE_DESIGN_1_7B: "Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign",
-    LocalTTSType.QWEN_VOICE_DESIGN_0_6B: "Qwen/Qwen3-TTS-12Hz-0.6B-VoiceDesign",
 }
 
 _PRESET_TYPES = {LocalTTSType.QWEN_PRESET_1_7B, LocalTTSType.QWEN_PRESET_0_6B}
 _CLONE_TYPES = {LocalTTSType.QWEN_VOICE_CLONE_1_7B, LocalTTSType.QWEN_VOICE_CLONE_0_6B}
-_DESIGN_TYPES = {LocalTTSType.QWEN_VOICE_DESIGN_1_7B, LocalTTSType.QWEN_VOICE_DESIGN_0_6B}
+_DESIGN_TYPES = {
+    LocalTTSType.QWEN_VOICE_DESIGN_1_7B,
+}
 
 
 class LocalTTSFactory:

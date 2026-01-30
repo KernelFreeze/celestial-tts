@@ -57,7 +57,6 @@ def download_models():
             ("Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign", "1.7B voice design"),
             ("Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice", "0.6B preset voice"),
             ("Qwen/Qwen3-TTS-12Hz-0.6B-Base", "0.6B voice clone"),
-            ("Qwen/Qwen3-TTS-12Hz-0.6B-VoiceDesign", "0.6B voice design"),
         ]
 
         success_count = 0
