@@ -65,7 +65,9 @@ class LocalTTSFactory:
             hf_name,
             device_map=device_map,
             dtype=torch.bfloat16,
-            attn_implementation="flash_attention_2",
+            attn_implementation="flash_attention_2"
+            if torch.cuda.is_available()
+            else "sdpa",
         )
 
         if model_type in _PRESET_TYPES:

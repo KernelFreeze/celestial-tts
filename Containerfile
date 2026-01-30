@@ -24,7 +24,7 @@ ENV UV_COMPILE_BYTECODE=1 \
 # Install dependencies first (cached layer)
 COPY pyproject.toml uv.lock README.md ./
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-install-project --no-dev --extra runpod
+    uv sync --frozen --no-install-project --no-dev --extra runpod --extra cuda
 
 # Copy source code
 COPY . .

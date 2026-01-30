@@ -106,7 +106,7 @@ git clone https://github.com/CelesteLove/celestial-tts.git
 cd celestial-tts
 
 # Install dependencies using uv
-uv sync
+uv sync --extra cuda
 
 # Or using pip
 pip install -e .
