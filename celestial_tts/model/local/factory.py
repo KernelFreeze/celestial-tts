@@ -11,9 +11,12 @@ from celestial_tts.model.local.qwen.preset import QwenTTSPreset
 
 
 class LocalTTSType(Enum):
-    QWEN_PRESET = "qwen3-tts-preset"
-    QWEN_VOICE_CLONE = "qwen3-tts-voice-clone"
-    QWEN_VOICE_DESIGN = "qwen3-tts-voice-design"
+    QWEN_PRESET_1_7B = "qwen3-tts-1.7b-preset"
+    QWEN_PRESET_0_6B = "qwen3-tts-0.6b-preset"
+    QWEN_VOICE_CLONE_1_7B = "qwen3-tts-1.7b-voice-clone"
+    QWEN_VOICE_CLONE_0_6B = "qwen3-tts-0.6b-voice-clone"
+    QWEN_VOICE_DESIGN_1_7B = "qwen3-tts-1.7b-voice-design"
+    QWEN_VOICE_DESIGN_0_6B = "qwen3-tts-0.6b-voice-design"
 
     @classmethod
     def from_str(cls, value: str) -> "LocalTTSType":
@@ -21,6 +24,20 @@ class LocalTTSType(Enum):
             if member.value == value:
                 return member
         raise HTTPException(400, f"Unknown local TTS type: {value}")
+
+
+_HF_MODEL_NAMES: dict[LocalTTSType, str] = {
+    LocalTTSType.QWEN_PRESET_1_7B: "Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice",
+    LocalTTSType.QWEN_PRESET_0_6B: "Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice",
+    LocalTTSType.QWEN_VOICE_CLONE_1_7B: "Qwen/Qwen3-TTS-12Hz-1.7B-Base",
+    LocalTTSType.QWEN_VOICE_CLONE_0_6B: "Qwen/Qwen3-TTS-12Hz-0.6B-Base",
+    LocalTTSType.QWEN_VOICE_DESIGN_1_7B: "Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign",
+    LocalTTSType.QWEN_VOICE_DESIGN_0_6B: "Qwen/Qwen3-TTS-12Hz-0.6B-VoiceDesign",
+}
+
+_PRESET_TYPES = {LocalTTSType.QWEN_PRESET_1_7B, LocalTTSType.QWEN_PRESET_0_6B}
+_CLONE_TYPES = {LocalTTSType.QWEN_VOICE_CLONE_1_7B, LocalTTSType.QWEN_VOICE_CLONE_0_6B}
+_DESIGN_TYPES = {LocalTTSType.QWEN_VOICE_DESIGN_1_7B, LocalTTSType.QWEN_VOICE_DESIGN_0_6B}
 
 
 class LocalTTSFactory:
@@ -40,29 +57,22 @@ class LocalTTSFactory:
         Raises:
             ValueError: If an unknown model type is provided.
         """
-        if model_type == LocalTTSType.QWEN_PRESET:
-            model = Qwen3TTSModel.from_pretrained(
-                "Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice",
-                device_map=device_map,
-                dtype=torch.bfloat16,
-                attn_implementation="sdpa",
-            )
+        hf_name = _HF_MODEL_NAMES.get(model_type)
+        if hf_name is None:
+            raise ValueError(f"Unknown Qwen TTS model type: {model_type}")
+
+        model = Qwen3TTSModel.from_pretrained(
+            hf_name,
+            device_map=device_map,
+            dtype=torch.bfloat16,
+            attn_implementation="sdpa",
+        )
+
+        if model_type in _PRESET_TYPES:
             return QwenTTSPreset(model=model)
-        elif model_type == LocalTTSType.QWEN_VOICE_CLONE:
-            model = Qwen3TTSModel.from_pretrained(
-                "Qwen/Qwen3-TTS-12Hz-1.7B-Base",
-                device_map=device_map,
-                dtype=torch.bfloat16,
-                attn_implementation="sdpa",
-            )
+        elif model_type in _CLONE_TYPES:
             return QwenTTSClone(model=model)
-        elif model_type == LocalTTSType.QWEN_VOICE_DESIGN:
-            model = Qwen3TTSModel.from_pretrained(
-                "Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign",
-                device_map=device_map,
-                dtype=torch.bfloat16,
-                attn_implementation="sdpa",
-            )
+        elif model_type in _DESIGN_TYPES:
             return QwenTTSDesign(model=model)
         else:
             raise ValueError(f"Unknown Qwen TTS model type: {model_type}")

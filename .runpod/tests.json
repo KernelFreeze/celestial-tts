@@ -3,7 +3,7 @@
         {
             "name": "test_generate_preset_voice",
             "input": {
-                "model_id": "qwen3-tts-preset",
+                "model_id": "qwen3-tts-1.7b-preset",
                 "text": "Hello, this is a test of the Celestial TTS system.",
                 "language": "english",
                 "speaker": "Vivian"
@@ -13,7 +13,7 @@
         {
             "name": "test_generate_alternate_voice",
             "input": {
-                "model_id": "qwen3-tts-preset",
+                "model_id": "qwen3-tts-1.7b-preset",
                 "text": "Testing with a different preset voice.",
                 "language": "english",
                 "speaker": "Dylan"
@@ -23,7 +23,7 @@
         {
             "name": "test_generate_multilingual",
             "input": {
-                "model_id": "qwen3-tts-preset",
+                "model_id": "qwen3-tts-1.7b-preset",
                 "text": "Bonjour, ceci est un test de synthèse vocale.",
                 "language": "french",
                 "speaker": "Vivian"

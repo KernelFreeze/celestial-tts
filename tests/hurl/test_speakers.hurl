@@ -10,7 +10,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-voice-design",
+  "model_id": "qwen3-tts-0.6b-voice-design",
   "text": "Hello, this is a test of my custom voice. I sound friendly and warm.",
   "language": "english",
   "speaker": "generated",
@@ -29,7 +29,7 @@ POST {{base_url}}/api/v1/speakers
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-preset",
+  "model_id": "qwen3-tts-0.6b-preset",
   "name": "Test Speaker",
   "text": "Hello, this is a test voice.",
   "audio": "{{reference_audio}}"
@@ -44,7 +44,7 @@ POST {{base_url}}/api/v1/speakers
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-voice-clone",
+  "model_id": "qwen3-tts-0.6b-voice-clone",
   "name": "Friendly Voice",
   "text": "Hello, this is a test of my custom voice. I sound friendly and warm.",
   "audio": "{{reference_audio}}"
@@ -63,7 +63,7 @@ POST {{base_url}}/api/v1/speakers
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-voice-clone",
+  "model_id": "qwen3-tts-0.6b-voice-clone",
   "name": "Invalid Audio Test",
   "text": "Test text",
   "audio": "not-valid-base64-or-url"
@@ -73,8 +73,8 @@ HTTP 400
 jsonpath "$.detail" contains "Audio input must be"
 
 
-# 5. Get all speakers for qwen3-tts-voice-clone model
-GET {{base_url}}/api/v1/speakers?model_id=qwen3-tts-voice-clone
+# 5. Get all speakers for qwen3-tts-0.6b-voice-clone model
+GET {{base_url}}/api/v1/speakers?model_id=qwen3-tts-0.6b-voice-clone
 Authorization: Bearer {{token}}
 HTTP 200
 [Asserts]
@@ -85,7 +85,7 @@ jsonpath "$.speakers[?(@.id == '{{speaker_id}}')].name" includes "Friendly Voice
 
 
 # 6. Get speakers for preset model (should return empty list)
-GET {{base_url}}/api/v1/speakers?model_id=qwen3-tts-preset
+GET {{base_url}}/api/v1/speakers?model_id=qwen3-tts-0.6b-preset
 Authorization: Bearer {{token}}
 HTTP 200
 [Asserts]
@@ -98,7 +98,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-voice-clone",
+  "model_id": "qwen3-tts-0.6b-voice-clone",
   "text": "This is a test using my cloned voice!",
   "language": "english",
   "speaker": "{{speaker_id}}"
@@ -116,7 +116,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-voice-clone",
+  "model_id": "qwen3-tts-0.6b-voice-clone",
   "text": "This should fail",
   "language": "english",
   "speaker": "00000000-0000-0000-0000-000000000000"
@@ -131,7 +131,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-voice-design",
+  "model_id": "qwen3-tts-0.6b-voice-design",
   "text": "Welcome to our service. Thank you for choosing us.",
   "language": "english",
   "speaker": "generated",
@@ -149,7 +149,7 @@ POST {{base_url}}/api/v1/speakers
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-voice-clone",
+  "model_id": "qwen3-tts-0.6b-voice-clone",
   "name": "Professional Voice",
   "text": "Welcome to our service. Thank you for choosing us.",
   "audio": "{{reference_audio_2}}"
@@ -163,7 +163,7 @@ jsonpath "$.speaker.name" == "Professional Voice"
 
 
 # 11. Verify both speakers are returned in the list
-GET {{base_url}}/api/v1/speakers?model_id=qwen3-tts-voice-clone
+GET {{base_url}}/api/v1/speakers?model_id=qwen3-tts-0.6b-voice-clone
 Authorization: Bearer {{token}}
 HTTP 200
 [Asserts]
@@ -178,7 +178,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-voice-design",
+  "model_id": "qwen3-tts-0.6b-voice-design",
   "text": "こんにちは、これはテストです。",
   "language": "japanese",
   "speaker": "generated",
@@ -196,7 +196,7 @@ POST {{base_url}}/api/v1/speakers
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-voice-clone",
+  "model_id": "qwen3-tts-0.6b-voice-clone",
   "name": "Japanese Voice",
   "text": "こんにちは、これはテストです。",
   "audio": "{{reference_audio_jp}}"
@@ -214,7 +214,7 @@ DELETE {{base_url}}/api/v1/speakers
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-voice-clone",
+  "model_id": "qwen3-tts-0.6b-voice-clone",
   "speaker_id": "invalid-uuid",
   "provider": "local"
 }
@@ -225,7 +225,7 @@ DELETE {{base_url}}/api/v1/speakers
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-voice-clone",
+  "model_id": "qwen3-tts-0.6b-voice-clone",
   "speaker_id": "00000000-0000-0000-0000-000000000000",
   "provider": "local"
 }
@@ -239,7 +239,7 @@ DELETE {{base_url}}/api/v1/speakers
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-preset",
+  "model_id": "qwen3-tts-0.6b-preset",
   "speaker_id": "{{speaker_id}}",
   "provider": "local"
 }
@@ -253,7 +253,7 @@ DELETE {{base_url}}/api/v1/speakers
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-voice-clone",
+  "model_id": "qwen3-tts-0.6b-voice-clone",
   "speaker_id": "{{speaker_id_jp}}"
 }
 HTTP 200
@@ -263,7 +263,7 @@ jsonpath "$.message" == "Speaker deleted successfully"
 
 
 # 18. Verify the Japanese speaker is no longer in the list
-GET {{base_url}}/api/v1/speakers?model_id=qwen3-tts-voice-clone
+GET {{base_url}}/api/v1/speakers?model_id=qwen3-tts-0.6b-voice-clone
 Authorization: Bearer {{token}}
 HTTP 200
 [Asserts]
@@ -276,7 +276,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-voice-clone",
+  "model_id": "qwen3-tts-0.6b-voice-clone",
   "text": "This should fail",
   "language": "english",
   "speaker": "{{speaker_id_jp}}"
@@ -291,7 +291,7 @@ DELETE {{base_url}}/api/v1/speakers
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-voice-clone",
+  "model_id": "qwen3-tts-0.6b-voice-clone",
   "speaker_id": "{{speaker_id}}"
 }
 HTTP 200
@@ -304,7 +304,7 @@ DELETE {{base_url}}/api/v1/speakers
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-voice-clone",
+  "model_id": "qwen3-tts-0.6b-voice-clone",
   "speaker_id": "{{speaker_id_2}}"
 }
 HTTP 200
@@ -316,7 +316,7 @@ jsonpath "$.status" == "ok"
 POST {{base_url}}/api/v1/speakers
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-voice-clone",
+  "model_id": "qwen3-tts-0.6b-voice-clone",
   "name": "Unauthorized Voice",
   "text": "This should fail without auth.",
   "audio": "{{reference_audio}}"
@@ -325,7 +325,7 @@ HTTP 401
 
 
 # 23. Test getting speakers without authentication (should fail)
-GET {{base_url}}/api/v1/speakers?model_id=qwen3-tts-voice-clone
+GET {{base_url}}/api/v1/speakers?model_id=qwen3-tts-0.6b-voice-clone
 HTTP 401
 
 
@@ -333,7 +333,7 @@ HTTP 401
 DELETE {{base_url}}/api/v1/speakers
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-voice-clone",
+  "model_id": "qwen3-tts-0.6b-voice-clone",
   "speaker_id": "00000000-0000-0000-0000-000000000000"
 }
 HTTP 401
@@ -344,7 +344,7 @@ POST {{base_url}}/api/v1/speakers
 Authorization: Bearer invalid-token-here
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-voice-clone",
+  "model_id": "qwen3-tts-0.6b-voice-clone",
   "name": "Invalid Token Voice",
   "text": "This should fail with invalid token.",
   "audio": "{{reference_audio}}"

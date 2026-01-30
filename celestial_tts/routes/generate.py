@@ -19,7 +19,7 @@ Status = Literal["ok", "error"]
 
 class GenerateRequest(BaseModel):
     model_id: str = Field(
-        description="The model ID to use (e.g., 'qwen3-tts-preset' or 'qwen3-tts-custom')"
+        description="The model ID to use (e.g., 'qwen3-tts-1.7b-preset' or 'qwen3-tts-1.7b-voice-clone')"
     )
     text: Union[NonEmptyStr, List[NonEmptyStr]] = Field(
         description="Text to synthesize. Can be a single string or a list of strings."

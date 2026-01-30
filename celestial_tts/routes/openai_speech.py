@@ -51,7 +51,7 @@ class SpeechRequest(BaseModel):
     """OpenAI-compatible speech synthesis request."""
 
     model: str = Field(
-        description="Model ID to use. Use 'tts-1' for preset voices or specify a model like 'qwen3-tts-preset'"
+        description="Model ID to use. Use 'tts-1' for preset voices or specify a model like 'qwen3-tts-1.7b-preset'"
     )
     input: str = Field(
         max_length=4096, description="The text to generate audio for (max 4096 chars)"
@@ -86,14 +86,14 @@ def _map_model_id(model: str) -> LocalTTSType:
     # Map OpenAI-style model names
     model_lower = model.lower()
     if model_lower in ("tts-1", "tts-1-hd"):
-        return LocalTTSType.QWEN_PRESET
+        return LocalTTSType.QWEN_PRESET_1_7B
     elif "clone" in model_lower or "custom" in model_lower:
-        return LocalTTSType.QWEN_VOICE_CLONE
+        return LocalTTSType.QWEN_VOICE_CLONE_1_7B
     elif "design" in model_lower:
-        return LocalTTSType.QWEN_VOICE_DESIGN
+        return LocalTTSType.QWEN_VOICE_DESIGN_1_7B
 
     # Default to preset model
-    return LocalTTSType.QWEN_PRESET
+    return LocalTTSType.QWEN_PRESET_1_7B
 
 
 def _map_voice(voice: str) -> str:

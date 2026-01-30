@@ -69,7 +69,7 @@ if [ "$DRY_RUN" = true ]; then
 else
     echo "If the container started successfully, check the logs above for:"
     echo "  1. 'Configuration loaded: device_map=cuda:0'"
-    echo "  2. 'Loading model qwen3-tts-preset on device: cuda:0'"
+    echo "  2. 'Loading model qwen3-tts-1.7b-preset on device: cuda:0'"
     echo ""
     echo "If it shows 'cpu' instead of 'cuda:0', the env vars aren't being read correctly."
     echo ""

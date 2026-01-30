@@ -70,7 +70,7 @@ class TestBasicSpeech:
         output_file = tmp_path / "test_native.mp3"
 
         with client.audio.speech.with_streaming_response.create(
-            model="qwen3-tts-preset",
+            model="qwen3-tts-0.6b-preset",
             voice="Vivian",
             input="Testing with native model ID and speaker.",
         ) as response:

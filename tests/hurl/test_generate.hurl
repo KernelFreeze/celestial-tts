@@ -7,7 +7,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-preset",
+  "model_id": "qwen3-tts-0.6b-preset",
   "text": "Hello, this is a test of the text to speech system.",
   "language": "english",
   "speaker": "Vivian"
@@ -26,7 +26,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-preset",
+  "model_id": "qwen3-tts-0.6b-preset",
   "text": ["First sentence.", "Second sentence.", "Third sentence."],
   "language": "english",
   "speaker": "Eric"
@@ -44,7 +44,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-preset",
+  "model_id": "qwen3-tts-0.6b-preset",
   "text": "This voice should sound happy and enthusiastic!",
   "language": "english",
   "speaker": "Serena",
@@ -62,7 +62,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-preset",
+  "model_id": "qwen3-tts-0.6b-preset",
   "text": "Testing with all parameters set.",
   "language": "english",
   "speaker": "Dylan",
@@ -85,7 +85,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-preset",
+  "model_id": "qwen3-tts-0.6b-preset",
   "text": "Testing Ryan's voice.",
   "language": "english",
   "speaker": "Ryan"
@@ -101,7 +101,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-preset",
+  "model_id": "qwen3-tts-0.6b-preset",
   "text": "Testing Aiden's voice.",
   "language": "english",
   "speaker": "Aiden"
@@ -117,7 +117,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-preset",
+  "model_id": "qwen3-tts-0.6b-preset",
   "text": "Testing Uncle Fu's voice.",
   "language": "english",
   "speaker": "Uncle_Fu"
@@ -133,7 +133,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-preset",
+  "model_id": "qwen3-tts-0.6b-preset",
   "text": "你好，这是中文测试。",
   "language": "chinese",
   "speaker": "Vivian"
@@ -150,7 +150,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-preset",
+  "model_id": "qwen3-tts-0.6b-preset",
   "text": "こんにちは、これは日本語のテストです。",
   "language": "japanese",
   "speaker": "Ono_Anna"
@@ -167,7 +167,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-preset",
+  "model_id": "qwen3-tts-0.6b-preset",
   "text": "안녕하세요, 이것은 한국어 테스트입니다.",
   "language": "korean",
   "speaker": "Sohee"
@@ -184,7 +184,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-preset",
+  "model_id": "qwen3-tts-0.6b-preset",
   "text": "Hallo, das ist ein deutscher Test.",
   "language": "german",
   "speaker": "Eric"
@@ -201,7 +201,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-preset",
+  "model_id": "qwen3-tts-0.6b-preset",
   "text": "Bonjour, ceci est un test en français.",
   "language": "french",
   "speaker": "Serena"
@@ -218,7 +218,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-preset",
+  "model_id": "qwen3-tts-0.6b-preset",
   "text": "Привет, это русский тест.",
   "language": "russian",
   "speaker": "Dylan"
@@ -235,7 +235,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-preset",
+  "model_id": "qwen3-tts-0.6b-preset",
   "text": "Olá, este é um teste em português.",
   "language": "portuguese",
   "speaker": "Ryan"
@@ -252,7 +252,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-preset",
+  "model_id": "qwen3-tts-0.6b-preset",
   "text": "Hola, esta es una prueba en español.",
   "language": "spanish",
   "speaker": "Aiden"
@@ -269,7 +269,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-preset",
+  "model_id": "qwen3-tts-0.6b-preset",
   "text": "Ciao, questo è un test in italiano.",
   "language": "italian",
   "speaker": "Uncle_Fu"
@@ -286,7 +286,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-preset",
+  "model_id": "qwen3-tts-0.6b-preset",
   "text": "This should fail",
   "language": "invalid_language",
   "speaker": "Vivian"
@@ -302,7 +302,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-preset",
+  "model_id": "qwen3-tts-0.6b-preset",
   "text": "This should fail",
   "language": "english",
   "speaker": "NonExistentSpeaker"
@@ -331,7 +331,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-preset",
+  "model_id": "qwen3-tts-0.6b-preset",
   "text": "",
   "language": "english",
   "speaker": "Vivian"
@@ -360,7 +360,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-preset",
+  "model_id": "qwen3-tts-0.6b-preset",
   "text": "Short test.",
   "language": "english",
   "speaker": "Vivian"
@@ -377,7 +377,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-preset",
+  "model_id": "qwen3-tts-0.6b-preset",
   "text": "Testing with mixed content: 你好 and hello",
   "language": "auto",
   "speaker": "Dylan"
@@ -394,7 +394,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-preset",
+  "model_id": "qwen3-tts-0.6b-preset",
   "text": "This is a longer text to test the generation capabilities of the text-to-speech system. It should handle multiple sentences and longer paragraphs without any issues. The system should produce high-quality audio output that maintains consistency throughout the entire generation process.",
   "language": "english",
   "speaker": "Serena"
@@ -407,7 +407,7 @@ jsonpath "$.sampling_rate" == 24000
 
 
 # =============================================
-# Voice Design Model Tests (qwen3-tts-voice-design)
+# Voice Design Model Tests (qwen3-tts-0.6b-voice-design)
 # =============================================
 
 # 26. Basic voice design generation
@@ -415,7 +415,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-voice-design",
+  "model_id": "qwen3-tts-0.6b-voice-design",
   "text": "Hello, this is a test of voice design.",
   "language": "english",
   "speaker": "generated",
@@ -434,7 +434,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-voice-design",
+  "model_id": "qwen3-tts-0.6b-voice-design",
   "text": "Welcome to our professional service.",
   "language": "english",
   "speaker": "generated",
@@ -452,7 +452,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-voice-design",
+  "model_id": "qwen3-tts-0.6b-voice-design",
   "text": "This should fail without instruct.",
   "language": "english",
   "speaker": "generated"
@@ -467,7 +467,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-voice-design",
+  "model_id": "qwen3-tts-0.6b-voice-design",
   "text": "This should fail with invalid speaker.",
   "language": "english",
   "speaker": "Vivian",
@@ -483,7 +483,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-voice-design",
+  "model_id": "qwen3-tts-0.6b-voice-design",
   "text": "你好，这是语音设计测试。",
   "language": "chinese",
   "speaker": "generated",
@@ -500,7 +500,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-voice-design",
+  "model_id": "qwen3-tts-0.6b-voice-design",
   "text": "こんにちは、音声デザインのテストです。",
   "language": "japanese",
   "speaker": "generated",
@@ -517,7 +517,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-voice-design",
+  "model_id": "qwen3-tts-0.6b-voice-design",
   "text": "Testing with custom sampling parameters.",
   "language": "english",
   "speaker": "generated",
@@ -540,7 +540,7 @@ jsonpath "$.wavs[0]" exists
 POST {{base_url}}/api/v1/generate
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-preset",
+  "model_id": "qwen3-tts-0.6b-preset",
   "text": "This should fail without auth.",
   "language": "english",
   "speaker": "Vivian"
@@ -553,7 +553,7 @@ POST {{base_url}}/api/v1/generate
 Authorization: Bearer invalid-token-here
 Content-Type: application/json
 {
-  "model_id": "qwen3-tts-preset",
+  "model_id": "qwen3-tts-0.6b-preset",
   "text": "This should fail with invalid token.",
   "language": "english",
   "speaker": "Vivian"

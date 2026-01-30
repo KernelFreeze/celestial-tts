@@ -39,7 +39,7 @@ POST {{base_url}}/api/v1/audio/speech
 Authorization: Bearer {{token}}
 Content-Type: application/json
 {
-  "model": "qwen3-tts-preset",
+  "model": "qwen3-tts-0.6b-preset",
   "voice": "Vivian",
   "input": "Testing with native model ID and speaker name."
 }

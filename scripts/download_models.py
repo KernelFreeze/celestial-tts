@@ -50,11 +50,14 @@ def download_models():
 
         logger.info(f"Using cache directory: {cache_dir}")
 
-        # All three Qwen3-TTS model variants
+        # All Qwen3-TTS model variants (1.7B and 0.6B)
         models_to_download = [
-            ("Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice", "preset voice"),
-            ("Qwen/Qwen3-TTS-12Hz-1.7B-Base", "voice clone"),
-            ("Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign", "voice design"),
+            ("Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice", "1.7B preset voice"),
+            ("Qwen/Qwen3-TTS-12Hz-1.7B-Base", "1.7B voice clone"),
+            ("Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign", "1.7B voice design"),
+            ("Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice", "0.6B preset voice"),
+            ("Qwen/Qwen3-TTS-12Hz-0.6B-Base", "0.6B voice clone"),
+            ("Qwen/Qwen3-TTS-12Hz-0.6B-VoiceDesign", "0.6B voice design"),
         ]
 
         success_count = 0

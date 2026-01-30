@@ -48,7 +48,7 @@ A multi-lingual, multi-provider Text-to-Speech (TTS) REST API microservice built
 
 - Python 3.12+
 - CUDA-capable GPU (recommended) or CPU
-- ~3.5GB RAM/VRAM per loaded model
+- ~3.5GB RAM/VRAM per loaded 1.7B model, ~1.5GB for 0.6B models
 
 ## Quick Start
 
@@ -154,7 +154,7 @@ You can deploy with one click using the badge at the top of this README, or by c
 ```json
 {
   "input": {
-    "model_id": "qwen3-tts-preset",
+    "model_id": "qwen3-tts-1.7b-preset",
     "text": "Hello, world!",
     "language": "english",
     "speaker": "Vivian"
@@ -207,7 +207,7 @@ endpoint = runpod.Endpoint("YOUR_ENDPOINT_ID")
 
 # Native mode
 result = endpoint.run_sync({
-    "model_id": "qwen3-tts-preset",
+    "model_id": "qwen3-tts-1.7b-preset",
     "text": "Hello from RunPod!",
     "language": "english",
     "speaker": "Vivian",
@@ -309,7 +309,7 @@ Include the token in your requests:
 curl -X POST http://localhost:8080/generate \
   -H "Authorization: Bearer sk-ct-v1-..." \
   -H "Content-Type: application/json" \
-  -d '{"model_id": "qwen3-tts-preset", "text": "Hello!", "language": "english", "speaker": "Vivian"}'
+  -d '{"model_id": "qwen3-tts-1.7b-preset", "text": "Hello!", "language": "english", "speaker": "Vivian"}'
 ```
 
 ### Public vs Protected Routes
@@ -416,8 +416,8 @@ You can also use native speaker names directly (`Vivian`, `Ryan`, etc.) or custo
 
 | OpenAI Model | Native Model |
 |--------------|--------------|
-| `tts-1` | qwen3-tts-preset |
-| `tts-1-hd` | qwen3-tts-preset |
+| `tts-1` | qwen3-tts-1.7b-preset |
+| `tts-1-hd` | qwen3-tts-1.7b-preset |
 
 **Response:**
 
@@ -464,7 +464,7 @@ POST /generate
 Content-Type: application/json
 
 {
-  "model_id": "qwen3-tts-preset",
+  "model_id": "qwen3-tts-1.7b-preset",
   "text": "Hello, world!",
   "language": "english",
   "speaker": "Vivian",
@@ -476,7 +476,7 @@ Content-Type: application/json
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `model_id` | string | Yes | `qwen3-tts-preset`, `qwen3-tts-voice-clone`, or `qwen3-tts-voice-design` |
+| `model_id` | string | Yes | `qwen3-tts-1.7b-preset`, `qwen3-tts-0.6b-preset`, `qwen3-tts-1.7b-voice-clone`, `qwen3-tts-0.6b-voice-clone`, `qwen3-tts-1.7b-voice-design`, or `qwen3-tts-0.6b-voice-design` |
 | `text` | string/array | Yes | Text to synthesize |
 | `language` | string | Yes | Language code (see supported languages) |
 | `speaker` | string | Yes | Preset name or custom speaker UUID |
@@ -501,7 +501,7 @@ Content-Type: application/json
 ### List Speakers
 
 ```http
-GET /speakers?model_id=qwen3-tts-preset
+GET /speakers?model_id=qwen3-tts-1.7b-preset
 ```
 
 **Response:**
@@ -523,7 +523,7 @@ POST /speakers
 Content-Type: application/json
 
 {
-  "model_id": "qwen3-tts-voice-clone",
+  "model_id": "qwen3-tts-1.7b-voice-clone",
   "name": "My Voice",
   "text": "The transcript of what is said in the audio",
   "audio": "https://example.com/reference.wav"
@@ -554,7 +554,7 @@ POST /generate
 Content-Type: application/json
 
 {
-  "model_id": "qwen3-tts-voice-design",
+  "model_id": "qwen3-tts-1.7b-voice-design",
   "text": "Hello, this is my designed voice!",
   "language": "english",
   "speaker": "generated",
@@ -579,7 +579,7 @@ DELETE /speakers
 Content-Type: application/json
 
 {
-  "model_id": "qwen3-tts-voice-clone",
+  "model_id": "qwen3-tts-1.7b-voice-clone",
   "speaker_id": "uuid7-string",
   "provider": "local"
 }
@@ -606,17 +606,37 @@ Content-Type: application/json
 
 For now, only the following local models are supported. I plan to add support for remote API end-points and more local models in the future.
 
-### qwen3-tts-preset
+### 1.7B Models
 
-Uses Qwen3-TTS with fixed preset voices. Best for quick, consistent results.
+The 1.7B variants offer higher quality output and are recommended for GPU deployments.
 
-### qwen3-tts-voice-clone
+#### qwen3-tts-1.7b-preset
 
-Supports voice cloning from audio samples. Create unique voices by providing a reference audio file and its transcript.
+Uses Qwen3-TTS 1.7B with fixed preset voices. Best for quick, consistent results.
 
-### qwen3-tts-voice-design
+#### qwen3-tts-1.7b-voice-clone
 
-Supports custom voice design. Create unique voices by providing reference text and voice instructions describing the desired voice characteristics.
+Supports voice cloning from audio samples using the 1.7B model. Create unique voices by providing a reference audio file and its transcript.
+
+#### qwen3-tts-1.7b-voice-design
+
+Supports custom voice design using the 1.7B model. Create unique voices by providing reference text and voice instructions describing the desired voice characteristics.
+
+### 0.6B Models
+
+The 0.6B variants are smaller and more CPU-friendly, suitable for environments with limited resources or when lower latency is preferred over maximum quality.
+
+#### qwen3-tts-0.6b-preset
+
+Uses Qwen3-TTS 0.6B with fixed preset voices. Lighter alternative to the 1.7B preset model.
+
+#### qwen3-tts-0.6b-voice-clone
+
+Supports voice cloning from audio samples using the 0.6B model. Lower resource usage compared to the 1.7B variant.
+
+#### qwen3-tts-0.6b-voice-design
+
+Supports custom voice design using the 0.6B model. Lower resource usage compared to the 1.7B variant.
 
 ## Usage Examples
 
@@ -672,7 +692,7 @@ response = requests.post(
     "http://localhost:8080/api/v1/generate",
     headers={"Authorization": f"Bearer {TOKEN}"},
     json={
-        "model_id": "qwen3-tts-preset",
+        "model_id": "qwen3-tts-1.7b-preset",
         "text": "Welcome to Celestial TTS!",
         "language": "english",
         "speaker": "Vivian"
@@ -693,7 +713,7 @@ curl -X POST http://localhost:8080/api/v1/generate \
   -H "Authorization: Bearer sk-ct-v1-..." \
   -H "Content-Type: application/json" \
   -d '{
-    "model_id": "qwen3-tts-preset",
+    "model_id": "qwen3-tts-1.7b-preset",
     "text": "Hello from the command line!",
     "language": "english",
     "speaker": "Dylan"
