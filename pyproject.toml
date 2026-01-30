@@ -27,6 +27,9 @@ test = [
     "openai>=1.59.7",
     "pytest>=8.3.4",
 ]
+runpod = [
+    "runpod>=1.7.0",
+]
 
 [project.scripts]
 celestial-tts = "main:cli_app"

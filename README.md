@@ -143,6 +143,94 @@ podman run --gpus all -p 8080:8080 \
   celestial-tts
 ```
 
+### RunPod Serverless Deployment
+
+Celestial TTS can run as a [RunPod](https://www.runpod.io/) serverless worker. The container image auto-detects the RunPod environment (via the `RUNPOD_POD_ID` environment variable) and switches from the HTTP server to a native RunPod handler that calls the TTS logic directly.
+
+You can deploy with one click using the badge at the top of this README, or by creating a serverless endpoint from the `ghcr.io/kernelfreeze/celestial-tts:latest` image.
+
+**Request format (native):**
+
+```json
+{
+  "input": {
+    "model_id": "qwen3-tts-preset",
+    "text": "Hello, world!",
+    "language": "english",
+    "speaker": "Vivian"
+  }
+}
+```
+
+**Response (native):**
+
+```json
+{
+  "status": "ok",
+  "wavs": ["<base64-encoded WAV>"],
+  "sampling_rate": 24000
+}
+```
+
+**Request format (OpenAI-compatible):**
+
+```json
+{
+  "input": {
+    "openai": true,
+    "model": "tts-1",
+    "voice": "alloy",
+    "input": "Hello, world!",
+    "response_format": "wav"
+  }
+}
+```
+
+**Response (OpenAI-compatible):**
+
+```json
+{
+  "status": "ok",
+  "audio": "<base64-encoded audio>",
+  "format": "wav",
+  "content_type": "audio/wav"
+}
+```
+
+**Python example:**
+
+```python
+import runpod
+import base64
+
+endpoint = runpod.Endpoint("YOUR_ENDPOINT_ID")
+
+# Native mode
+result = endpoint.run_sync({
+    "model_id": "qwen3-tts-preset",
+    "text": "Hello from RunPod!",
+    "language": "english",
+    "speaker": "Vivian",
+})
+
+audio_bytes = base64.b64decode(result["wavs"][0])
+with open("output.wav", "wb") as f:
+    f.write(audio_bytes)
+
+# OpenAI-compatible mode
+result = endpoint.run_sync({
+    "openai": True,
+    "model": "tts-1",
+    "voice": "nova",
+    "input": "Hello from RunPod!",
+    "response_format": "wav",
+})
+
+audio_bytes = base64.b64decode(result["audio"])
+with open("output.wav", "wb") as f:
+    f.write(audio_bytes)
+```
+
 ## Authentication
 
 Most API routes require a valid auth token. Tokens use the format `sk-ct-v1-<base64>` and are passed via the `Authorization` header as a Bearer token.
