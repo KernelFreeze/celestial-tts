@@ -1,6 +1,6 @@
 [project]
 name = "celestial-tts"
-version = "0.13.5"
+version = "0.14.0"
 description = "A Text-to-Speech (TTS) multi-lingual and multi-provider REST API microservice for generating speech from text."
 readme = "README.md"
 requires-python = ">=3.12.0, <3.13"
@@ -32,8 +32,8 @@ test = [
 runpod = ["runpod>=1.7.0"]
 cuda = ["flash-attn>=2.8.3"]
 nvfp4 = [
-    "nvidia-cutlass",
     "fp-quant>=0.3.2",
+    "qutlass>=0.1.0",
 ]
 
 [project.scripts]
@@ -46,12 +46,17 @@ build-backend = "hatchling.build"
 
 [tool.uv]
 package = true
+no-build-isolation-package = ["qutlass"]
 
 [tool.uv.extra-build-dependencies]
 flash-attn = ["torch"]
+qutlass = [
+    "torch",
+    "cmake",
+]
 
 [tool.uv.sources.flash-attn]
 url = "https://github.com/mjun0812/flash-attention-prebuild-wheels/releases/download/v0.7.16/flash_attn-2.6.3+cu128torch2.9-cp312-cp312-linux_x86_64.whl"
 
-[tool.uv.sources.nvidia-cutlass]
-git = "https://github.com/NVIDIA/cutlass"
+[tool.uv.sources.qutlass]
+git = "https://github.com/IST-DASLab/qutlass.git"
