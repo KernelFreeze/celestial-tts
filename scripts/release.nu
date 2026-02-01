@@ -36,7 +36,7 @@ def main [] {
 
     # Create github Release
     print "→ Creating GitHub release..."
-    github release create $version --generate-notes
+    gh release create $version --generate-notes
 
     print $"✓ Release ($version) complete!"
 }
