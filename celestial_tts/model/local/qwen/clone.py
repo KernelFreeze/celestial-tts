@@ -1,4 +1,3 @@
-import asyncio
 from typing import ClassVar, List, Literal, Optional, Set, Tuple, Union, get_args
 from uuid import UUID
 
@@ -15,6 +14,7 @@ from celestial_tts.database.controller.custom_speaker import (
 )
 from celestial_tts.database.utils import qwen_speaker_from_prompt
 from celestial_tts.model.local import LocalTTSModel, NonEmptyStr
+from celestial_tts.model.local.batcher import InferenceBatcher
 
 Language = Literal[
     "auto",
@@ -36,10 +36,9 @@ SUPPORTED_LANGUAGES: Set[Language] = set(get_args(Language))
 class QwenTTSClone(LocalTTSModel[Language, UUID]):
     """Qwen3 TTS using voice cloning"""
 
-    model_config = {"arbitrary_types_allowed": True}
     model: Qwen3TTSModel
     loaded: bool = True
-    lock: ClassVar[asyncio.Lock] = asyncio.Lock()
+    batcher: ClassVar[InferenceBatcher] = InferenceBatcher()
 
     def supports_custom_speakers(self) -> bool:
         return True
@@ -67,7 +66,7 @@ class QwenTTSClone(LocalTTSModel[Language, UUID]):
         self,
         model: Qwen3TTSModel,
     ):
-        super().__init__(model=model)
+        self.model = model
 
     async def str_to_language(
         self, database: Database, language_str: str
@@ -123,10 +122,23 @@ class QwenTTSClone(LocalTTSModel[Language, UUID]):
 
         voice_clone_prompt = db_speaker.to_voice_clone_prompt(self.model.device)
 
-        def run():
+        texts = text if isinstance(text, list) else [text]
+
+        batch_key = (
+            language,
+            speaker,
+            top_k,
+            top_p,
+            temperature,
+            repetition_penalty,
+            max_new_tokens,
+            tuple(sorted(kwargs.items())),
+        )
+
+        def run_batch(batch_texts: List[str]) -> Tuple[List[np.ndarray], int]:
             return self.model.generate_voice_clone(
                 voice_clone_prompt=[voice_clone_prompt],
-                text=text,
+                text=batch_texts,
                 language=language,
                 speaker=speaker,
                 top_k=top_k,
@@ -137,8 +149,7 @@ class QwenTTSClone(LocalTTSModel[Language, UUID]):
                 **kwargs,
             )
 
-        async with self.lock:  # Prevent concurrent use of the model
-            return await asyncio.to_thread(run)
+        return await self.batcher.submit(batch_key, texts, run_batch)
 
     def unload(self):
         if not self.loaded:

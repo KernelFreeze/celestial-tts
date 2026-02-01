@@ -1,7 +1,6 @@
 from typing import Generic, List, Optional, Set, Tuple, TypeVar, Union
 
 import numpy as np
-from pydantic import BaseModel
 from qwen_tts.inference.qwen3_tts_model import AudioLike
 
 from celestial_tts.database import Database
@@ -12,10 +11,7 @@ SpeakerT = TypeVar("SpeakerT")
 InstructT = TypeVar("InstructT")
 
 
-class LocalTTSModel(BaseModel, Generic[LanguageT, SpeakerT]):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
+class LocalTTSModel(Generic[LanguageT, SpeakerT]):
     def supports_custom_speakers(self) -> bool:
         """Return whether this model supports creating custom speakers."""
         return False

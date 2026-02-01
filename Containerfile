@@ -30,14 +30,14 @@ ENV UV_COMPILE_BYTECODE=1 \
 # Install dependencies first (cached layer)
 COPY pyproject.toml uv.lock README.md ./
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-install-project --no-dev --extra runpod --extra cuda --preview-features extra-build-dependencies
+    uv sync --frozen --no-install-project --no-dev --extra runpod --extra cuda --extra nvfp4 --preview-features extra-build-dependencies
 
 # Copy source code
 COPY . .
 
 # Install the project itself
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev --extra runpod --extra cuda --preview-features extra-build-dependencies
+    uv sync --frozen --no-dev --extra runpod --extra cuda --extra nvfp4 --preview-features extra-build-dependencies
 
 FROM nvidia/cuda:12.8.1-runtime-ubuntu24.04
 

@@ -1,24 +1,32 @@
+import copyreg
+import importlib
+import importlib.util
 import logging
 from enum import Enum
 
 import torch
 from fastapi.exceptions import HTTPException
 from qwen_tts import Qwen3TTSModel
+from transformers import BitsAndBytesConfig
 
 from celestial_tts.model.local import LocalTTSModel
 from celestial_tts.model.local.qwen.clone import QwenTTSClone
 from celestial_tts.model.local.qwen.design import QwenTTSDesign
 from celestial_tts.model.local.qwen.preset import QwenTTSPreset
 
+# HACK: Upstream qwen_tts stores ``dict.keys()`` views as model attributes
+# (e.g. ``self.supported_speakers = config...spk_id.keys()``).
+# The bitsandbytes 4-bit quantiser calls ``deepcopy(model)`` during
+# ``from_pretrained``, which fails because ``dict_keys`` is not picklable.
+# Register a reducer so ``copy``/``pickle`` can handle the type.
+# The copy materialises as a plain ``list``, which is fine — the
+# attribute is only used for iteration and membership tests.
+copyreg.pickle(type({}.keys()), lambda obj: (list, (list(obj),)))  # pyright: ignore[reportArgumentType]
+
 
 def _is_flash_attn_available() -> bool:
     """Check if flash-attn is available for use."""
-    try:
-        import flash_attn  # pyright: ignore[reportMissingImports, reportUnusedImport]  # noqa: F401
-
-        return True
-    except ImportError:
-        return False
+    return importlib.util.find_spec("flash_attn") is not None
 
 
 def _is_nvfp4_available() -> bool:
@@ -28,14 +36,10 @@ def _is_nvfp4_available() -> bool:
     major, _ = torch.cuda.get_device_capability()
     if major < 10:
         return False
-    try:
-        from torchao.quantization import (  # pyright: ignore[reportMissingImports]
-            NVFloat4Tensor,  # pyright: ignore[reportUnusedImport]
-        )
-
-        return True
-    except (ImportError, AttributeError):
+    if importlib.util.find_spec("torchao") is None:
         return False
+    torchao_quant = importlib.import_module("torchao.quantization")
+    return hasattr(torchao_quant, "NVFloat4Tensor")
 
 
 def _build_4bit_quant_config() -> object | None:
@@ -47,30 +51,18 @@ def _build_4bit_quant_config() -> object | None:
     Preference order: NVFP4 (Blackwell) > NF4 (bitsandbytes).
     """
     if _is_nvfp4_available():
-        from torchao.quantization import (  # pyright: ignore[reportMissingImports]
-            NVFloat4Tensor,
-        )
-        from transformers import TorchAoConfig  # pyright: ignore[reportMissingImports]
+        torchao_quant = importlib.import_module("torchao.quantization")
+        transformers = importlib.import_module("transformers")
 
         logging.info("Using NVFP4 4-bit quantization (Blackwell)")
-        return TorchAoConfig(quant_type=NVFloat4Tensor)
+        return transformers.TorchAoConfig(quant_type=torchao_quant.NVFloat4Tensor)
 
-    # Fallback: bitsandbytes NF4
-    try:
-        import bitsandbytes  # pyright: ignore[reportMissingImports, reportUnusedImport]  # noqa: F401
-        from transformers import (
-            BitsAndBytesConfig,  # pyright: ignore[reportMissingImports]
-        )
-
-        logging.info("Using NF4 4-bit quantization (bitsandbytes)")
-        return BitsAndBytesConfig(
-            load_in_4bit=True,
-            bnb_4bit_compute_dtype=torch.bfloat16,
-            bnb_4bit_quant_type="nf4",
-        )
-    except ImportError:
-        logging.warning("4-bit quantization requested but no backend available")
-        return None
+    logging.info("Using NF4 4-bit quantization (bitsandbytes)")
+    return BitsAndBytesConfig(
+        load_in_4bit=True,
+        bnb_4bit_compute_dtype=torch.bfloat16,
+        bnb_4bit_quant_type="nf4",
+    )
 
 
 class LocalTTSType(Enum):
@@ -156,15 +148,15 @@ class LocalTTSFactory:
 
         try:
             model.model = torch.compile(  # pyright: ignore[reportAttributeAccessIssue]
-                model.model, mode="reduce-overhead", fullgraph=True
+                model.model, mode="max-autotune", fullgraph=True
             )
             logging.info("Model compiled successfully")
         except Exception as e:
             logging.warning(f"Failed to compile model: {e}. Using slow path")
 
         try:
-            model.speech_tokenizer.model = torch.compile(  # pyright: ignore[reportAttributeAccessIssue]
-                model.speech_tokenizer.model,  # pyright: ignore[reportAttributeAccessIssue]
+            model.model.speech_tokenizer.model = torch.compile(
+                model.model.speech_tokenizer.model,
                 mode="max-autotune",
                 fullgraph=True,
             )

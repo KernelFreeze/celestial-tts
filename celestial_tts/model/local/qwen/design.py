@@ -1,4 +1,3 @@
-import asyncio
 from typing import ClassVar, List, Literal, Optional, Set, Tuple, Union, get_args
 
 import numpy as np
@@ -7,6 +6,7 @@ from qwen_tts import Qwen3TTSModel
 
 from celestial_tts.database import Database
 from celestial_tts.model.local import LocalTTSModel, NonEmptyStr
+from celestial_tts.model.local.batcher import InferenceBatcher
 
 Language = Literal[
     "auto",
@@ -32,16 +32,15 @@ SUPPORTED_SPEAKERS: Set[Speaker] = set(get_args(Speaker))
 class QwenTTSDesign(LocalTTSModel[Language, Speaker]):
     """Qwen3 TTS using designed voices by the model"""
 
-    model_config = {"arbitrary_types_allowed": True}
     model: Qwen3TTSModel
     loaded: bool = True
-    lock: ClassVar[asyncio.Lock] = asyncio.Lock()
+    batcher: ClassVar[InferenceBatcher] = InferenceBatcher()
 
     def __init__(
         self,
         model: Qwen3TTSModel,
     ):
-        super().__init__(model=model)
+        self.model = model
 
     async def str_to_language(
         self, database: Database, language_str: str
@@ -88,9 +87,23 @@ class QwenTTSDesign(LocalTTSModel[Language, Speaker]):
                 detail="Instruct is required for voice design. Please provide a valid instruction.",
             )
 
-        def run():
+        texts = text if isinstance(text, list) else [text]
+
+        batch_key = (
+            language,
+            speaker,
+            instruct,
+            top_k,
+            top_p,
+            temperature,
+            repetition_penalty,
+            max_new_tokens,
+            tuple(sorted(kwargs.items())),
+        )
+
+        def run_batch(batch_texts: List[str]) -> Tuple[List[np.ndarray], int]:
             return self.model.generate_voice_design(
-                text=text,
+                text=batch_texts,
                 language=language,
                 speaker=speaker,
                 instruct=instruct,
@@ -102,8 +115,7 @@ class QwenTTSDesign(LocalTTSModel[Language, Speaker]):
                 **kwargs,
             )
 
-        async with self.lock:  # Prevent concurrent use of the model
-            return await asyncio.to_thread(run)
+        return await self.batcher.submit(batch_key, texts, run_batch)
 
     def unload(self):
         if not self.loaded:
