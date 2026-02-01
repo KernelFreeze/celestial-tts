@@ -34,5 +34,9 @@ def main [] {
     git push
     git push --tags
 
+    # Create github Release
+    print "→ Creating GitHub release..."
+    github release create $version --generate-notes
+
     print $"✓ Release ($version) complete!"
 }
