@@ -1,6 +1,6 @@
 [project]
 name = "celestial-tts"
-version = "0.11.0"
+version = "0.12.0"
 description = "A Text-to-Speech (TTS) multi-lingual and multi-provider REST API microservice for generating speech from text."
 readme = "README.md"
 requires-python = ">=3.12.0, <3.13"
@@ -36,7 +36,7 @@ cuda = [
     "flash-attn>=2.8.3",
 ]
 nvfp4 = [
-    "torchao>=0.15.0",
+    "torchao>=0.14.0,<0.15.0",
 ]
 
 [project.scripts]
