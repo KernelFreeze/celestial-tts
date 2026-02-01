@@ -38,6 +38,7 @@ def _is_nvfp4_available() -> bool:
         return False
     try:
         transformers = importlib.import_module("transformers")
+
         return hasattr(transformers, "FPQuantConfig")
     except ImportError:
         return False
@@ -52,12 +53,12 @@ def _build_4bit_quant_config() -> object | None:
     Preference order: NVFP4 (Blackwell) > NF4 (bitsandbytes).
     """
     if _is_nvfp4_available():
-        transformers = importlib.import_module("transformers")
+        from transformers import FPQuantConfig
 
         logging.info(
             "Using NVFP4 4-bit quantization (A Blackwell or newer GPU was detected)"
         )
-        return transformers.FPQuantConfig(forward_dtype="nvfp4")
+        return FPQuantConfig(forward_dtype="nvfp4", pseudoquantization=False)
 
     logging.info("Using NF4 4-bit quantization (bitsandbytes)")
     return BitsAndBytesConfig(
