@@ -1,3 +1,4 @@
+import logging
 from enum import Enum
 
 import torch
@@ -78,12 +79,22 @@ class LocalTTSFactory:
         else:
             attn_impl = "sdpa"
 
+        logging.info(f"Using attention implementation: {attn_impl}")
+
         model = Qwen3TTSModel.from_pretrained(
             hf_name,
             device_map=device_map,
             dtype=torch.bfloat16,
             attn_implementation=attn_impl,
         )
+
+        try:
+            model.model = torch.compile(  # pyright: ignore[reportAttributeAccessIssue]
+                model.model, mode="max-autotune", fullgraph=True
+            )
+            logging.info("Model compiled successfully")
+        except Exception as e:
+            logging.warning(f"Failed to compile model: {e}. Using slow path")
 
         if model_type in _PRESET_TYPES:
             return QwenTTSPreset(model=model)

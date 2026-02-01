@@ -6,8 +6,11 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 
 WORKDIR /app
 
+ENV TZ=Etc/UTC
+ENV DEBIAN_FRONTEND=noninteractive
+
 # Install Python 3.12 and system dependencies for audio processing
-RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     python3.12 \
     python3.12-dev \
     libsox-dev \
@@ -17,7 +20,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --no-ins
 # Point uv at the system Python
 ENV UV_PYTHON=/usr/bin/python3.12
 
-# Prevent a 3 hour compilation of flash-attn (better safe than sorry)
+# Prevent a 3 hour compilation of flash-attn
 ENV FLASH_ATTENTION_SKIP_CUDA_BUILD=TRUE
 
 # Enable bytecode compilation and link mode for faster startup
@@ -40,8 +43,11 @@ FROM nvidia/cuda:12.8.1-runtime-ubuntu24.04
 
 WORKDIR /app
 
+ENV TZ=Etc/UTC
+ENV DEBIAN_FRONTEND=noninteractive
+
 # Install only runtime dependencies (no -dev packages, no uv)
-RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     python3.12 \
     sox \
     && rm -rf /var/lib/apt/lists/*
