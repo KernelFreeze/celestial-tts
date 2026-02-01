@@ -78,7 +78,9 @@ def _get_models():
 def _load_model_sync(model_type, device_map):
     """Synchronous model loading to run in thread pool."""
     logger.info(f"Loading model {model_type.value} on device: {device_map}")
-    model = LocalTTSFactory.create(model_type, device_map)
+    model = LocalTTSFactory.create(
+        model_type, device_map, quantize_4bit=config.integrated_models.quantize_4bit
+    )
     logger.info(f"Model {model_type.value} loaded on device: {device_map}")
     return model
 

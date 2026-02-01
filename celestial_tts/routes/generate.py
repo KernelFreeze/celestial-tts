@@ -80,7 +80,9 @@ async def generate(
         model = models.local_state.model_cache.get_or_put(
             model_type,
             lambda: LocalTTSFactory.create(
-                model_type, config.integrated_models.device_map
+                model_type,
+                config.integrated_models.device_map,
+                quantize_4bit=config.integrated_models.quantize_4bit,
             ),
         )
         if model is None:

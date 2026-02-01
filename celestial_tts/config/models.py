@@ -25,3 +25,8 @@ class IntegratedModelsConfig(BaseSettings):
         default="cpu",
         description="Device map for integrated models",
     )
+
+    quantize_4bit: bool = Field(
+        default=False,
+        description="Enable 4-bit weight quantization (NVFP4 on Blackwell, NF4 otherwise)",
+    )
