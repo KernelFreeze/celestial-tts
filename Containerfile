@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3.12-dev \
     libsox-dev \
     sox \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
 # Point uv at the system Python
