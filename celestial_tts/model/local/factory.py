@@ -155,8 +155,8 @@ class LocalTTSFactory:
             logging.warning(f"Failed to compile model: {e}. Using slow path")
 
         try:
-            model.model.speech_tokenizer.model = torch.compile(
-                model.model.speech_tokenizer.model,
+            model.model.speech_tokenizer.model = torch.compile(  # pyright: ignore[reportOptionalMemberAccess]
+                model.model.speech_tokenizer.model,  # pyright: ignore[reportOptionalMemberAccess]
                 mode="max-autotune",
                 fullgraph=True,
             )
