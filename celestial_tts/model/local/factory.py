@@ -30,16 +30,17 @@ def _is_flash_attn_available() -> bool:
 
 
 def _is_nvfp4_available() -> bool:
-    """Check if NVFP4 quantization is available (requires Blackwell GPU + torchao)."""
+    """Check if NVFP4 quantization is available (requires Blackwell GPU + fp_quant)."""
     if not torch.cuda.is_available():
         return False
     major, _ = torch.cuda.get_device_capability()
     if major < 10:
         return False
-    if importlib.util.find_spec("torchao") is None:
+    try:
+        transformers = importlib.import_module("transformers")
+        return hasattr(transformers, "FPQuantConfig")
+    except ImportError:
         return False
-    torchao_quant = importlib.import_module("torchao.quantization")
-    return hasattr(torchao_quant, "NVFloat4Tensor")
 
 
 def _build_4bit_quant_config() -> object | None:
@@ -51,11 +52,12 @@ def _build_4bit_quant_config() -> object | None:
     Preference order: NVFP4 (Blackwell) > NF4 (bitsandbytes).
     """
     if _is_nvfp4_available():
-        torchao_quant = importlib.import_module("torchao.quantization")
         transformers = importlib.import_module("transformers")
 
-        logging.info("Using NVFP4 4-bit quantization (Blackwell)")
-        return transformers.TorchAoConfig(quant_type=torchao_quant.NVFloat4Tensor)
+        logging.info(
+            "Using NVFP4 4-bit quantization (A Blackwell or newer GPU was detected)"
+        )
+        return transformers.FPQuantConfig(forward_dtype="nvfp4")
 
     logging.info("Using NF4 4-bit quantization (bitsandbytes)")
     return BitsAndBytesConfig(
