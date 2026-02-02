@@ -30,15 +30,16 @@ def _is_flash_attn_available() -> bool:
 
 
 def _is_nvfp4_available() -> bool:
-    """Check if NVFP4 quantization is available (requires Blackwell GPU + fp_quant)."""
+    """Check if NVFP4 quantization is available (requires Blackwell GPU + fp_quant + qutlass)."""
     if not torch.cuda.is_available():
         return False
     major, _ = torch.cuda.get_device_capability()
     if major < 10:
         return False
+    if importlib.util.find_spec("qutlass") is None:
+        return False
     try:
         transformers = importlib.import_module("transformers")
-
         return hasattr(transformers, "FPQuantConfig")
     except ImportError:
         return False
