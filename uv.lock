@@ -376,7 +376,7 @@ wheels = [
 
 [[package]]
 name = "celestial-tts"
-version = "0.14.0"
+version = "0.14.1"
 source = { editable = "." }
 dependencies = [
     { name = "aiosqlite" },
@@ -429,7 +429,7 @@ requires-dist = [
     { name = "passlib", specifier = ">=1.7.4" },
     { name = "pydantic-settings", specifier = ">=2.12.0" },
     { name = "pytest", marker = "extra == 'test'", specifier = ">=8.3.4" },
-    { name = "qutlass", marker = "extra == 'nvfp4'", git = "https://github.com/IST-DASLab/qutlass.git" },
+    { name = "qutlass", marker = "extra == 'nvfp4'", url = "https://github.com/KernelFreeze/qutlass-wheel/releases/download/v0.2.0-qutlass/qutlass-0.2.0-cp312-cp312-linux_x86_64.whl" },
     { name = "qwen-tts", specifier = ">=0.0.4" },
     { name = "runpod", marker = "extra == 'runpod'", specifier = ">=1.7.0" },
     { name = "safetensors", specifier = ">=0.7.0" },
@@ -1953,7 +1953,10 @@ wheels = [
 [[package]]
 name = "qutlass"
 version = "0.2.0"
-source = { git = "https://github.com/IST-DASLab/qutlass.git#03c6337c51ac57a65813658cf68ca7236526a904" }
+source = { url = "https://github.com/KernelFreeze/qutlass-wheel/releases/download/v0.2.0-qutlass/qutlass-0.2.0-cp312-cp312-linux_x86_64.whl" }
+wheels = [
+    { url = "https://github.com/KernelFreeze/qutlass-wheel/releases/download/v0.2.0-qutlass/qutlass-0.2.0-cp312-cp312-linux_x86_64.whl", hash = "sha256:a11e1f4093cc2ce228115ccfbe90bf3de90a0089a0758f602d6766b6b39ab04b" },
+]
 
 [[package]]
 name = "qwen-tts"
